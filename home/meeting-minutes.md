@@ -1,8 +1,102 @@
 # ⏲️ Meeting Minutes
 
-## March XX, 2024
+## ![](<../.gitbook/assets/func\_round3 (1).png>)March 06, 2024
 
-#### LnL nans
+Things to go over:
+
+* Toy simulation studies
+* LnL(Mc, z | COMPAS SF params) -> nan fix?
+* Surrogate LnL(Mc, z | COMPAS SF params) using 4 params?
+* Surrogate LnL(Mc, z | COMPAS SF params)  -> P(COMPAS SF params| Mc, z)
+* Next steps
+
+### \[Toy] Simulation Studies
+
+* 1\) Multimodal LnL
+  * Simulate LnL + train Lnl surrogate
+  * Compute KL divergence WRT number of 'training' points for the surrogate
+    * _Can we get low KL divergences? Can we use this as a stopping criterion for training?_
+* 2\) Posterior generation with surrogate LnL
+  * Simulate N datasets with some model,&#x20;
+    * run PE using an analytical Bayesian framework
+    * run PE using LnL surrogate **(stop using some automated critera)**
+    * Compare corners + make PP plots -- are posteriors sensible?
+
+**Code for simulation studies:** [https://github.com/COMPAS-Surrogate/simulation\_study](https://github.com/COMPAS-Surrogate/simulation\_study)&#x20;
+
+### 1) Multimodal LnL
+
+**Basic test**
+
+{% embed url="https://compas-surrogate.github.io/lnl_surrogate/studies/example.html#bimodal-gaussian" %}
+Bimodal example
+{% endembed %}
+
+| Exploratory Acquisition                                                                                                             | Exploitative Acquisition                                                                                                             | Combined Acquisition                                                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_explore.gif" alt="Exploratory" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_exploit.gif" alt="Exploitative" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_both.gif" alt="Combined" data-size="original"> |
+
+![](https://compas-surrogate.github.io/lnl\_surrogate/\_images/regret\_multi.png)
+
+**KL Divergence**
+
+
+
+<div>
+
+<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd0.png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd1.png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd2.png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd3.png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd4.png" alt=""><figcaption></figcaption></figure>
+
+</div>
+
+<figure><img src="../.gitbook/assets/regret_vs_kl (1).png" alt=""><figcaption></figcaption></figure>
+
+**Repeating 50 times:**
+
+<div>
+
+<figure><img src="../.gitbook/assets/kl_divergence.png" alt=""><figcaption><p>KL Div decreases as we expect </p></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/error_histogram.png" alt=""><figcaption><p>By iteration~15 we've reached the peak of the LnL surface</p></figcaption></figure>
+
+</div>
+
+Looks like the the mix of exploration + exploitation seems to work? There is probably room for improvement here....
+
+@ JEFF -- maybe you can poke around this simulation study? (or construct more complex simulation studies -- eg an egg box? Or [Johannes Buchner (pymultinest)'](https://dynesty.readthedocs.io/en/latest/examples.html#exponential-wave)s exponential wave example?
+
+
+
+### **Linear regression simulation study**
+
+| Regret (min acquired point, stopped at red line)                                                                                                                                                                               | Compare posteriors                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| <p></p><p><img src="../.gitbook/assets/regret_vs_kl.png" alt="Y-axis is the Min LnL (min acquired point, not the surrogate, the training data), the red line marks the &#x27;stopping critera&#x27;" data-size="original"></p> | <img src="../.gitbook/assets/corner (3).png" alt="" data-size="original"> |
+
+
+
+<figure><img src="../.gitbook/assets/pp_plot.png" alt=""><figcaption></figcaption></figure>
+
+###
+
+### LnL nans
 
 Likelihood equation: $$\log L(D|\lambda) = \log L_{\rm Poisson}(N_{obs}|\lambda) + \sum^{N_{obs}} \log p(D_i | \lambda)$$
 
@@ -116,69 +210,19 @@ The `self.n_detections(duration)`--> 0 leading to the nan
 
 <mark style="color:red;">is my Current fix valid:</mark> <mark style="color:red;"></mark><mark style="color:red;">`prob_of_mcz`</mark><mark style="color:red;">-> 0 if</mark>  $$N_{model}==0$$
 
-#### Multimodal 1d Gaussian
 
 
+### LnL(BBH | COMPAS SF params) Surrogate
 
+<figure><img src="../.gitbook/assets/bo_metrics_round3.png" alt=""><figcaption></figcaption></figure>
 
+<figure><img src="../.gitbook/assets/eval_round3.png" alt=""><figcaption></figcaption></figure>
 
-**Basic test**
+| \~10 Pts                                                                   | \~50 Pts                                                                       |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| <img src="../.gitbook/assets/func_round0.png" alt="" data-size="original"> | <img src="../.gitbook/assets/func_round3 (2).png" alt="" data-size="original"> |
 
-{% embed url="https://compas-surrogate.github.io/lnl_surrogate/studies/example.html#bimodal-gaussian" %}
-Bimodal example
-{% endembed %}
-
-| Exploratory Acquisition                                                                                                             | Exploitative Acquisition                                                                                                             | Combined Acquisition                                                                                                          |
-| ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_explore.gif" alt="Exploratory" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_exploit.gif" alt="Exploitative" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_both.gif" alt="Combined" data-size="original"> |
-
-![](https://compas-surrogate.github.io/lnl\_surrogate/\_images/regret\_multi.png)
-
-**KL Divergence**
-
-
-
-<div>
-
-<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd0.png" alt=""><figcaption></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd1.png" alt=""><figcaption></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd2.png" alt=""><figcaption></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd3.png" alt=""><figcaption></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd4.png" alt=""><figcaption></figcaption></figure>
-
-</div>
-
-<figure><img src="../.gitbook/assets/regret_vs_kl.png" alt=""><figcaption></figcaption></figure>
-
-**Repeating 50 times:**
-
-<div>
-
-<figure><img src="../.gitbook/assets/kl_divergence.png" alt=""><figcaption><p>KL Div decreases as we expect </p></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/error_histogram.png" alt=""><figcaption><p>By iteration~15 we've reached the peak of the LnL surface</p></figcaption></figure>
-
-</div>
-
-
-
-
-
-**PP-Plot**
+***
 
 ## Feb 19th, 2024
 
