@@ -224,11 +224,7 @@ The `self.n_detections(duration)`--> 0 leading to the nan
 
 ### P(COMPAS SF param | BBH)
 
-
-
-
-
-
+<figure><img src="../.gitbook/assets/Screenshot from 2024-03-06 10-20-25.png" alt="" width="534"><figcaption></figcaption></figure>
 
 ***
 
