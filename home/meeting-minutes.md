@@ -118,7 +118,17 @@ is my Current fix valid: `prob_of_mcz`--> 0 if $N\_{model}==0$?
 
 #### Multimodal 1d Gaussian
 
+
+
+
+
 **Basic test**
+
+{% embed url="https://compas-surrogate.github.io/lnl_surrogate/studies/example.html#bimodal-gaussian" %}
+Bimodal example
+{% endembed %}
+
+
 
 **Posterior generation**
 
