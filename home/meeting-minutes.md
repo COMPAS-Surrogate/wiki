@@ -1,6 +1,6 @@
 # ⏲️ Meeting Minutes
 
-## ![](<../.gitbook/assets/func\_round3 (1).png>)March 06, 2024
+## March 06, 2024
 
 Things to go over:
 
