@@ -84,7 +84,7 @@ Looks like the the mix of exploration + exploitation seems to work? There is pro
 
 
 
-### **Linear regression simulation study**
+### **2) Linear regression simulation study**
 
 | Regret (min acquired point, stopped at red line)                                                                                                                                                                               | Compare posteriors                                                        |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
@@ -221,6 +221,14 @@ The `self.n_detections(duration)`--> 0 leading to the nan
 | \~10 Pts                                                                   | \~50 Pts                                                                       |
 | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | <img src="../.gitbook/assets/func_round0.png" alt="" data-size="original"> | <img src="../.gitbook/assets/func_round3 (2).png" alt="" data-size="original"> |
+
+### P(COMPAS SF param | BBH)
+
+
+
+
+
+
 
 ***
 
