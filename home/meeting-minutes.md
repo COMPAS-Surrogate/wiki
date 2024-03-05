@@ -114,7 +114,7 @@ The `self.n_detections(duration)`--> 0 leading to the nan
 
 </details>
 
-is my Current fix valid: `prob_of_mcz`--> 0 if $N\_{model}==0$?
+<mark style="color:red;">is my Current fix valid:</mark> <mark style="color:red;"></mark><mark style="color:red;">`prob_of_mcz`</mark><mark style="color:red;">-> 0 if</mark>  $$N_{model}==0$$
 
 #### Multimodal 1d Gaussian
 
@@ -128,9 +128,55 @@ is my Current fix valid: `prob_of_mcz`--> 0 if $N\_{model}==0$?
 Bimodal example
 {% endembed %}
 
+| Exploratory Acquisition                                                                                                             | Exploitative Acquisition                                                                                                             | Combined Acquisition                                                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_explore.gif" alt="Exploratory" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_exploit.gif" alt="Exploitative" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_both.gif" alt="Combined" data-size="original"> |
+
+![](https://compas-surrogate.github.io/lnl\_surrogate/\_images/regret\_multi.png)
+
+**KL Divergence**
 
 
-**Posterior generation**
+
+<div>
+
+<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd0.png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd1.png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd2.png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd3.png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd4.png" alt=""><figcaption></figcaption></figure>
+
+</div>
+
+<figure><img src="../.gitbook/assets/regret_vs_kl.png" alt=""><figcaption></figcaption></figure>
+
+**Repeating 50 times:**
+
+<div>
+
+<figure><img src="../.gitbook/assets/kl_divergence.png" alt=""><figcaption><p>KL Div decreases as we expect </p></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/error_histogram.png" alt=""><figcaption><p>By iteration~15 we've reached the peak of the LnL surface</p></figcaption></figure>
+
+</div>
+
+
+
+
 
 **PP-Plot**
 
