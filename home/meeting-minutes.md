@@ -2,6 +2,24 @@
 
 ## March 06, 2024
 
+| RHS LnL                                                                       | LHS LnL                                                                                               |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| <p><span class="math">\log L(D|\lambda)</span></p><p></p>                     | $$\log L_{\rm Poisson}(N_{obs}|\lambda) + \log L_{Grid}(D|\lambda)$$                                  |
+| <p><span class="math">\log L_{\rm Poisson}(N_{obs}|\lambda)</span></p><p></p> | $$\log L_{\rm Poisson}(N_{obs}|\lambda) \propto N_{obs} \log(N_{model}(\lambda))-N_{model}(\lambda)$$ |
+| <p><span class="math">\log L_{Grid}(D|\lambda)</span></p><p></p>              | $$\sum^{N_{obs}} \log p(z=z_i, M_c=M_c,i | \lambda)$$                                                 |
+
+Note -- for the Poisson LnL, we ignore terms that depend on the data only. These disappear on normalization, such as log(Nobs!) and permutation coefficients.
+
+
+
+&#x20;![plot\_cosmo\_0 010\_2 770\_2 900\_4 700\_0 035\_-0 230](https://github.com/COMPAS-Surrogate/pipeline/assets/15642823/7b7bfb06-54f4-43b0-ad0a-3223ac2564b2)
+
+`aSF=0.01, dSF=4.70, mu_z=-0.01, sigma0=0.0`
+
+**Priors**
+
+<mark style="color:red;">is my Current fix valid:</mark> <mark style="color:red;"></mark><mark style="color:red;">`prob_of_mcz`</mark><mark style="color:red;">-> 0 if</mark>  $$N_{model}==0$$<mark style="color:red;">?</mark>
+
 Things to go over:
 
 * Toy simulation studies
@@ -37,6 +55,16 @@ Bimodal example
 | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_explore.gif" alt="Exploratory" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_exploit.gif" alt="Exploitative" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_both.gif" alt="Combined" data-size="original"> |
 
 ![](https://compas-surrogate.github.io/lnl\_surrogate/\_images/regret\_multi.png)
+
+| Exploratory Acquisition                                                                                                             | Exploitative Acquisition                                                                                                             | Combined Acquisition                                                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_explore.gif" alt="Exploratory" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_exploit.gif" alt="Exploitative" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_both.gif" alt="Combined" data-size="original"> |
+
+![](https://compas-surrogate.github.io/lnl\_surrogate/\_images/regret\_multi.png)
+
+
+
+
 
 **KL Divergence**
 
