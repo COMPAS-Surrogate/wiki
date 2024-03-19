@@ -13,6 +13,16 @@
 * Do 1D/2D surrogate posteriors eventually have the same KL-distances? (as we increase number of acquired training points)
 * What about 4D surrogate posteriors?
 
+**NEXT STEPS**
+
+* Lets make a sharper LnL peak, we can do this by&#x20;
+  * Increase the number of detected events in mock dataset
+  * Increase the prior range
+* 1D case: exploitation-acquisition or GP kernel -- is something messed up?
+* 2D case: animation of surrogate model + alongside True LnL surface
+* Chayan: to test out NN-LnLSurrogate to generate posteriors
+* Ignore dSF in 2D investigations for now -> Flat posterior
+
 
 
 ### 1D COMPAS LnL-Surrogate posteriors
@@ -52,6 +62,10 @@
 | ![](<../.gitbook/assets/eval\_round2\_47pts (1).png>) | ![](<../.gitbook/assets/round\_round2\_47pts (1).png>) | ![](../.gitbook/assets/round2\_47pts\_corner.png) | <img src="../.gitbook/assets/kl_distances (1).png" alt="" data-size="original"> |
 
 _<mark style="color:red;">negative KL distance?</mark>_
+
+* aSF increases the number of detections -- we expect the posterior 1sigma \~ sqrt(N)
+
+
 
 #### muz-sigma0
 
