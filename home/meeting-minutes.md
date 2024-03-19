@@ -1,5 +1,58 @@
 # ⏲️ Meeting Minutes
 
+## March 20, 2024
+
+**Last meeting:**
+
+* Surrogate LnL simulation studies (and PP-test)
+* 4D COMPAS surrogate LnL -> Posterior (but used bogus COMPAS population)
+
+**Main goals:**&#x20;
+
+* Investigate COMPAS LnL Surrogate with 'realistic' COMPAS output
+* Do 1D/2D surrogate posteriors eventually have the same KL-distances? (as we increase number of acquired training points)
+* What about 4D surrogate posteriors?
+
+
+
+### 1D COMPAS LnL-Surrogate posteriors
+
+{% tabs %}
+{% tab title="aSF" %}
+| Corners                             | KL-Distance                               |
+| ----------------------------------- | ----------------------------------------- |
+| ![](../.gitbook/assets/corners.gif) | ![](../.gitbook/assets/kl\_distances.png) |
+{% endtab %}
+
+{% tab title="dSF" %}
+| Corners                                                                    | KL-Distance                                     |
+| -------------------------------------------------------------------------- | ----------------------------------------------- |
+| <img src="../.gitbook/assets/corners_dsf.gif" alt="" data-size="original"> | ![](<../.gitbook/assets/kl\_distances (1).png>) |
+{% endtab %}
+
+{% tab title="mu_z" %}
+| Corners                                   | KL-Distance                                                                     |
+| ----------------------------------------- | ------------------------------------------------------------------------------- |
+| ![](<../.gitbook/assets/corners (1).gif>) | <img src="../.gitbook/assets/kl_distances (2).png" alt="" data-size="original"> |
+{% endtab %}
+
+{% tab title="sigma_0" %}
+| Corners                                                                    | KL-Distance                                                                     |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| <img src="../.gitbook/assets/corners (2).gif" alt="" data-size="original"> | <img src="../.gitbook/assets/kl_distances (3).png" alt="" data-size="original"> |
+{% endtab %}
+{% endtabs %}
+
+### 2D COMPAS LnL-Surrogate posteriors
+
+### 4D COMPAS Lnl-Surrogate posteriors
+
+
+
+
+
+
+
 ## March 06, 2024
 
 | RHS LnL                                                                       | LHS LnL                                                                                               |
