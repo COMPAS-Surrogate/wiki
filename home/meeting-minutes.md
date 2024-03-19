@@ -19,37 +19,153 @@
 
 {% tabs %}
 {% tab title="aSF" %}
-| Corners                             | KL-Distance                               |
-| ----------------------------------- | ----------------------------------------- |
-| ![](../.gitbook/assets/corners.gif) | ![](../.gitbook/assets/kl\_distances.png) |
+| Corners                             | KL-Distance                                     |
+| ----------------------------------- | ----------------------------------------------- |
+| ![](../.gitbook/assets/corners.gif) | ![](<../.gitbook/assets/kl\_distances (4).png>) |
 {% endtab %}
 
 {% tab title="dSF" %}
-| Corners                                                                    | KL-Distance                                     |
-| -------------------------------------------------------------------------- | ----------------------------------------------- |
-| <img src="../.gitbook/assets/corners_dsf.gif" alt="" data-size="original"> | ![](<../.gitbook/assets/kl\_distances (1).png>) |
+| Corners                                                                    | KL-Distance                                         |
+| -------------------------------------------------------------------------- | --------------------------------------------------- |
+| <img src="../.gitbook/assets/corners_dsf.gif" alt="" data-size="original"> | ![](<../.gitbook/assets/kl\_distances (1) (1).png>) |
 {% endtab %}
 
 {% tab title="mu_z" %}
-| Corners                                   | KL-Distance                                                                     |
-| ----------------------------------------- | ------------------------------------------------------------------------------- |
-| ![](<../.gitbook/assets/corners (1).gif>) | <img src="../.gitbook/assets/kl_distances (2).png" alt="" data-size="original"> |
+| Corners                                   | KL-Distance                                                                         |
+| ----------------------------------------- | ----------------------------------------------------------------------------------- |
+| ![](<../.gitbook/assets/corners (1).gif>) | <img src="../.gitbook/assets/kl_distances (2) (1).png" alt="" data-size="original"> |
 {% endtab %}
 
 {% tab title="sigma_0" %}
-| Corners                                                                    | KL-Distance                                                                     |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| <img src="../.gitbook/assets/corners (2).gif" alt="" data-size="original"> | <img src="../.gitbook/assets/kl_distances (3).png" alt="" data-size="original"> |
+| Corners                                                                    | KL-Distance                                                                         |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| <img src="../.gitbook/assets/corners (2).gif" alt="" data-size="original"> | <img src="../.gitbook/assets/kl_distances (3) (1).png" alt="" data-size="original"> |
 {% endtab %}
 {% endtabs %}
 
 ### 2D COMPAS LnL-Surrogate posteriors
 
+#### aSF-dSF
+
+| Acquired points                                       | GP mean                                                | Posterior                                         | KL Distance                                                                     |
+| ----------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------- |
+| ![](<../.gitbook/assets/eval\_round2\_47pts (1).png>) | ![](<../.gitbook/assets/round\_round2\_47pts (1).png>) | ![](../.gitbook/assets/round2\_47pts\_corner.png) | <img src="../.gitbook/assets/kl_distances (1).png" alt="" data-size="original"> |
+
+_<mark style="color:red;">negative KL distance?</mark>_
+
+#### muz-sigma0
+
+<div>
+
+<figure><img src="../.gitbook/assets/kl_distances (2).png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/bo_metrics_round2_55pts.png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/eval_round2_55pts.png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/round_round2_55pts.png" alt=""><figcaption></figcaption></figure>
+
+</div>
+
+
+
+
+
 ### 4D COMPAS Lnl-Surrogate posteriors
 
+:cry: Posteriors dont look great... could this just be due to sampler settings?&#x20;
+
+```
+niterations = 1000, nwalkers = 10
+```
+
+#### Using normal GP, same kernel, scikit-minimize to optimize GP parameters
+
+**Corners**
+
+<div>
+
+<figure><img src="../.gitbook/assets/round1_20pts_corner.png" alt=""><figcaption><p>20 pts</p></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/round12_75pts_corner.png" alt=""><figcaption><p>75 pts</p></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/round16_95pts_corner.png" alt=""><figcaption><p>95 pts</p></figcaption></figure>
+
+</div>
+
+**Training points acquired**
+
+<div>
+
+<figure><img src="../.gitbook/assets/eval_round1_20pts.png" alt=""><figcaption><p>20 pts</p></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/eval_round12_75pts.png" alt=""><figcaption><p>75 pts</p></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/eval_round16_95pts.png" alt=""><figcaption><p>95 pts</p></figcaption></figure>
+
+</div>
+
+**Kl Distance + Regret**
+
+<div>
+
+<figure><img src="../.gitbook/assets/kl_distances.png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/bo_metrics_round16_95pts.png" alt=""><figcaption></figcaption></figure>
+
+</div>
 
 
 
+### Trying again with more points...
+
+|                                                     |                                                 |
+| --------------------------------------------------- | ----------------------------------------------- |
+| ![](../.gitbook/assets/round23\_250pts\_corner.png) | ![](<../.gitbook/assets/kl\_distances (3).png>) |
+
+### Trying with a 'deep' GP
+
+
+
+<div>
+
+<figure><img src="../.gitbook/assets/round0_30pts_corner.png" alt=""><figcaption><p>30</p></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/round3_90pts_corner.png" alt=""><figcaption><p>90</p></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/round9_210pts_corner.png" alt=""><figcaption><p>210</p></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/round24_510pts_corner.png" alt=""><figcaption><p>510</p></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/round59_1210pts_corner.png" alt=""><figcaption><p>1210</p></figcaption></figure>
+
+</div>
+
+<figure><img src="../.gitbook/assets/kl_distances (5).png" alt="" width="320"><figcaption></figcaption></figure>
 
 
 
