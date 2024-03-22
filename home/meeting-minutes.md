@@ -1,5 +1,24 @@
 # ⏲️ Meeting Minutes
 
+## April 8t, 2024
+
+
+
+**Summary of work**
+
+* Investigated LnL surface in 2d using TF probability + vanilla GP
+*
+
+    <figure><img src="../.gitbook/assets/gp_with_true_vals.gif" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/surface.gif" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/rounds (1).gif" alt=""><figcaption></figcaption></figure>
+
+##
+
+##
+
 ## March 20, 2024
 
 **Last meeting:**
