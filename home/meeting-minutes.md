@@ -1,21 +1,23 @@
 # ⏲️ Meeting Minutes
 
-## April 8t, 2024
+## April 18thh, 2024
 
 
 
 **Summary of work**
 
-* Investigated LnL surface in 2d using TF probability + vanilla GP
-*
+* investigated LnL surface in 2d using TF probability + vanilla GP
+* PP-Tests
 
-    <figure><img src="../.gitbook/assets/gp_with_true_vals.gif" alt=""><figcaption></figcaption></figure>
+**1) LnL Surface**
 
-<figure><img src="../.gitbook/assets/surface.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/gp_with_true_vals.gif" alt=""><figcaption><p>Looks decent? Again, surrogate uncertainty large! </p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/rounds (1).gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/rounds (1).gif" alt=""><figcaption><p>'Deep-GP' not set up correctly... </p></figcaption></figure>
 
-##
+**2) PP-Tests**
+
+
 
 ##
 
