@@ -17,9 +17,23 @@
 
 **2) PP-Tests**
 
+<figure><img src="../.gitbook/assets/pp_sfd.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/pp_muz.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/pp_sig0.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/pp_sfa.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/pp_two_param.png" alt=""><figcaption></figcaption></figure>
 
 
-##
+
+<figure><img src="../.gitbook/assets/pp_round1.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/pp_round4.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/pp_round9.png" alt=""><figcaption></figcaption></figure>
 
 ## March 20, 2024
 
