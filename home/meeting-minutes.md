@@ -1,6 +1,6 @@
 # ⏲️ Meeting Minutes
 
-## April 18thh, 2024
+## April 18th, 2024
 
 
 
@@ -12,20 +12,6 @@
 **1) LnL Surface**
 
 <figure><img src="../.gitbook/assets/gp_with_true_vals.gif" alt=""><figcaption><p>Looks decent? Again, surrogate uncertainty large! </p></figcaption></figure>
-
-TODO: look at relative tolerance error between the True LnL + Surrogate --> compare that with the surrogate uncertainty. The uncertainty in the surrogate likelihood should be _LARGER_ than the relative error
-
-If Surrogate Uncertainty < than the relative error&#x20;
-
-logLbest --> the 'true' best LnL&#x20;
-
-logLmean --> the surrogate LnL at true LogLBest
-
-&#x20;logLdelta --> the surrogate uncertainty at LogLBest
-
-**Sanity check: |logLdelta|>1 AND logLmean+logLdelta > logLbest**
-
-
 
 
 
@@ -43,11 +29,7 @@ logLmean --> the surrogate LnL at true LogLBest
 
 <figure><img src="../.gitbook/assets/pp_two_param.png" alt=""><figcaption></figcaption></figure>
 
-For SF\[a] --> we can write down LnL analytically. SF\[a] just gives a offset to the LnL  (like a scaling term almost)
 
-Sf\[a] --> affects the number of events
-
-We know the _analytical_ uncertinaty for  LnL(d|SF\[a]) -> How do the uncertainties for surrogate @LnL(d|SF\[a]) match up with analytical LnL(d|SF\[a]) &#x20;
 
 
 
@@ -57,19 +39,34 @@ We know the _analytical_ uncertinaty for  LnL(d|SF\[a]) -> How do the uncertaint
 
 <figure><img src="../.gitbook/assets/pp_round9.png" alt=""><figcaption></figcaption></figure>
 
-ACTION ITEMS:
+#### **ACTION ITEMS:**
 
-* Add number of training points in PP-plots
-* How sensitive is the pp-plot for the MCMC (using the same random seed, same data, generate the PP-plot with higher MCMC iterations)&#x20;
-* analytical Delta LnL(data|SF\[a]) comparison with  surrogate Delta LnL(data|SF\[a])
-* **"Variable LnL"** --> Surrogate gives us LnLmean, LnLsigma. For LnL estimate, we could sample from Normal(LnlMean, LnLSigma) instead of just taking LnLmean
+**Sanity checks:**
+
+* **Plot:** the surrogate uncertainty should contain the best 'training point' value:
+  * &#x20;$$|\Delta \ln\mathcal{L}| > 1 \ \&\&  \ln\mathcal{L} + |\Delta \ln\mathcal{L}| > \ln\mathcal{L}_{best}$$
+* **COMPARE**_:_ $$\Delta \ln\mathcal{L}(d| {\rm SF}[A])_{analytical} / \Delta \ln\mathcal{L}(d| {\rm SF}[A])_{surrogate} \propto  0$$
+  * Sf\[a] -> affects the number of events, will affect the overall scaling of the LnL surface
+
+**Variable LnL:**
+
+* Surrogate gives us $$\ln\mathcal{L} + |\Delta \ln\mathcal{L}|$$
+  *   We could compute $$\ln \mathcal{L}(d|\theta)_{\rm Variable} = \mathcal{N}( \mu=ln \mathcal{L}(d|\theta), \sigma= |\Delta \ln \mathcal{L}(d|\theta)|)$$
+
+
 * Create Surrogate model, two inference runs (one with variable LnL, one with just the mean LnL)
-  * If posteriors are very different, systematic uncertainties are large --> we havent trained the surrogate well enought
-  * If we ran longer, created a better surrogate model, then the posteriors will start converging....
+  * If posteriors are very different, systematic uncertainties are large --> we havent trained the surrogate well enough
+  * If we ran longer, and created a better surrogate model, then the posteriors will start converging....
 
+**PP-Plots**
 
+* Add the number of training points in PP plots (and the acquisition function)&#x20;
+* How sensitive is the PP-Plot to:
+  * Number of MCMC iterations
+  * Variable LnL vs mean LnL&#x20;
+  * Different acquisition functions
 
-QS
+**QS**
 
 * How do we know if our acquisition functions are working?
 * What about GP parameters?
