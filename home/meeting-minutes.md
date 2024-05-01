@@ -15,6 +15,15 @@
     <figure><img src="../.gitbook/assets/aSF_posterior.png" alt=""><figcaption></figcaption></figure>
 
     * Variable LnL /increased MCMC iterations -> Appear to give visually consistent results with the normal LnL/sampler settings
+    *
+
+        <figure><img src="../.gitbook/assets/round1_15pts_mcmccompare_corner.png" alt=""><figcaption></figcaption></figure>
+
+        <figure><img src="../.gitbook/assets/round0_10pts_variablecompare_corner.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/round1_15pts_variablecompare_corner.png" alt=""><figcaption></figcaption></figure>
+
+
 
 
 
