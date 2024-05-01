@@ -26,6 +26,11 @@
 
 
 
+    * **The analytical VS the surrogate posterior arnt great:** maybe manually generate the training-set for the GP (dont even bother with the acquisition function).
+      * Plot the LnL surface near the posterior peak region...
+      * Maybe just let the surrogate run for longer...?
+      *
+    *
     * Variable LnL /increased MCMC iterations -> Appear to give visually consistent results with the normal LnL/sampler settings
     *
 
@@ -59,7 +64,7 @@ From Ilya (COMPAS slack, April 23rd)
 5. Then the expectation value of a (the mean of the posterior on a) is given by \<a> = \int\_0^\infty exp(-mu\_1 a) a^n a da / \int\_0^\infty exp(-mu\_1 a) a^n da.
 6. Similarly, \<a^2> = = \int\_0^\infty exp(-mu\_1 a) a^n a^2 da / \int\_0^\infty exp(-mu\_1 a) a^n da, from which the expected uncertainty on a, \sigma\_a, can be computed via \sigma\_a^2 = \<a^2>-\<a>^2.
 7. The integrals can be evaluated numerically or written as Gamma functions, by noticing that they all have the form \int\_0^\infty exp(-m a) a^k da =  \int\_0^\infty exp(-b) (b/m)^k db/m = m^{-k-1} \int\_0^\infty exp(-b) b^k db = m^{-(k+1)} Gamma(k+1).
-8. Approximately, however, we will expect the mean and peak of the posterior to be around \<a> \~ d/mu\_1 and its standard deviation to be approximately sigma\_a \~ \<a> / sqrt(d).
+8. Approximately, however, we will expect the mean and peak of the posterior to be around \<a> \~ n/mu\_1 and its standard deviation to be approximately sigma\_a \~ \<a> / sqrt(n).
 
 ##
 
