@@ -1,5 +1,47 @@
 # ⏲️ Meeting Minutes
 
+## May 2nd, 2024
+
+**Summary:**
+
+*   Added **LnL uncertainty check** in 'regret' plots&#x20;
+
+    * Bug: i'm plotting the _final_ GP uncertainty rather than the uncertainty at each stage... (the initial uncertainty is large, and eventually becomes smaller once we have acquired more points. We dont see this as I accidentally just display the _final_ GP uncertainty)
+
+    <figure><img src="../.gitbook/assets/bo_metrics_round1_15pts.png" alt=""><figcaption></figcaption></figure>
+
+    * P(aSF|d) sanity check: MCMC posteriors seem wider than analytical...&#x20;
+
+    <figure><img src="../.gitbook/assets/aSF_posterior.png" alt=""><figcaption></figcaption></figure>
+
+    * Variable LnL /increased MCMC iterations -> Appear to give visually consistent results with the normal LnL/sampler settings
+
+
+
+* Acquisition function bug:
+  * When using the largest dataset from Jeff's work, the acquisition function fails to acquire a new 'better' point...&#x20;
+
+
+
+
+
+
+
+**Analytical P(aSF|d) Sanity check notes**
+
+From Ilya (COMPAS slack, April 23rd)
+
+1. The only relevant term in the likelihood is p(data|mu) = exp(-mu) mu^n / n!, where n is the observed number of detections and mu is the number of detections predicted by the model.
+2. mu = mu(a\_SF=1) \* a, or just mu = a mu\_1 where mu\_1 \equiv mu (a\_SF=1) is computed once numerically using the post-processing script by setting a\_SF equal to 1 (remember all the other post-processing parameters are fixed for this exercise).
+3. Then the likelihood is p(d|a) = exp(-mu\_1 a) mu\_1^n a^n / n!
+4. Assuming a flat broad prior on a (with a \geq 0), the posterior is proportional to the likelihood up to normalisation; since mu\_1 and d are constants, the posterior is proportional to p(a|n) \propto exp(-mu\_1 a) a^n.
+5. Then the expectation value of a (the mean of the posterior on a) is given by \<a> = \int\_0^\infty exp(-mu\_1 a) a^n a da / \int\_0^\infty exp(-mu\_1 a) a^n da.
+6. Similarly, \<a^2> = = \int\_0^\infty exp(-mu\_1 a) a^n a^2 da / \int\_0^\infty exp(-mu\_1 a) a^n da, from which the expected uncertainty on a, \sigma\_a, can be computed via \sigma\_a^2 = \<a^2>-\<a>^2.
+7. The integrals can be evaluated numerically or written as Gamma functions, by noticing that they all have the form \int\_0^\infty exp(-m a) a^k da =  \int\_0^\infty exp(-b) (b/m)^k db/m = m^{-k-1} \int\_0^\infty exp(-b) b^k db = m^{-(k+1)} Gamma(k+1).
+8. Approximately, however, we will expect the mean and peak of the posterior to be around \<a> \~ d/mu\_1 and its standard deviation to be approximately sigma\_a \~ \<a> / sqrt(d).
+
+##
+
 ## April 18th, 2024
 
 
