@@ -1,10 +1,68 @@
 # ⏲️ Meeting Minutes
 
-## May XX, 2024
+## June 28, 2024
+
+
+
+
+
+
+
+#### Paper draft:&#x20;
+
+[https://github.com/COMPAS-Surrogate/paper/raw/main-pdf/ms.pdf](https://github.com/COMPAS-Surrogate/paper/raw/main-pdf/ms.pdf)
+
+#### Analytical check
 
 <figure><img src="../.gitbook/assets/aSF_posterior (1).png" alt=""><figcaption></figcaption></figure>
 
-##
+
+
+#### LVK&#x20;
+
+{% file src="../.gitbook/assets/5M_50_940pts.pdf" %}
+
+{% file src="../.gitbook/assets/5M_500_940pts.pdf" %}
+
+{% file src="../.gitbook/assets/5M_5000_380pts.pdf" %}
+
+{% file src="../.gitbook/assets/5M_50000_940pts.pdf" %}
+
+{% file src="../.gitbook/assets/5M_500000_940pts.pdf" %}
+
+{% file src="../.gitbook/assets/32M_50_780pts.pdf" %}
+
+{% file src="../.gitbook/assets/32M_500_780pts.pdf" %}
+
+{% file src="../.gitbook/assets/32M_5000_780pts.pdf" %}
+
+{% file src="../.gitbook/assets/32M_50000_780pts.pdf" %}
+
+{% file src="../.gitbook/assets/32M_500000_780pts.pdf" %}
+
+{% file src="../.gitbook/assets/LNLs_5M_50_940pts.pdf" %}
+
+{% file src="../.gitbook/assets/LNLs_5M_500_940pts.pdf" %}
+
+{% file src="../.gitbook/assets/LNLs_5M_5000_380pts.pdf" %}
+
+{% file src="../.gitbook/assets/LNLs_5M_50000_940pts.pdf" %}
+
+{% file src="../.gitbook/assets/LNLs_5M_500000_940pts.pdf" %}
+
+{% file src="../.gitbook/assets/LNLs_32M_50_780pts.pdf" %}
+
+{% file src="../.gitbook/assets/LNLs_32M_500_780pts.pdf" %}
+
+{% file src="../.gitbook/assets/LNLs_32M_5000_780pts.pdf" %}
+
+{% file src="../.gitbook/assets/LNLs_32M_50000_780pts.pdf" %}
+
+{% file src="../.gitbook/assets/LNLs_32M_500000_780pts.pdf" %}
+
+
+
+
 
 
 
