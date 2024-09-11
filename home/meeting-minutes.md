@@ -48,7 +48,21 @@ We have to normalise the number of binaries we create by the total star forming 
 
 1. **P(aSF|data) analytical test:**
 
-<figure><img src="../.gitbook/assets/aSF_posterior (1).png" alt=""><figcaption></figcaption></figure>
+I've been trying to validate the surrogate model.&#x20;
+
+* [#id-1-p-asf-or-d-analytical-check](meeting-minutes.md#id-1-p-asf-or-d-analytical-check "mention")
+* P(aSF, dSF, muz, sigma0 | d ) surrogate vs "variable" surrogate
+* P(aSF, dSF, muz, sigma0 | d ) surrogate using "feasability" regions
+
+
+
+
+
+
+
+### 1) P(aSF|d) analytical check
+
+<figure><img src="../.gitbook/assets/aSF_posterior (1).png" alt="" width="320"><figcaption></figcaption></figure>
 
 #### LVK&#x20;
 
@@ -101,6 +115,29 @@ We have to normalise the number of binaries we create by the total star forming 
 Still working on it... [toy model code here](https://github.com/COMPAS-Surrogate/active\_learning\_feasability\_region).
 
 <figure><img src="../.gitbook/assets/Screenshot 2024-05-16 at 8.41.40 am.png" alt=""><figcaption></figcaption></figure>
+
+* Green posterior: MCMC using LnL(d|θ)\~GPμ(θ)
+* Blue posterior: MCMC using LnL(d|θ)\~N(GPμ(θ), GPσ(θ))
+* Orange posterior: MCMC using LnL(d|θ)\~GPμ(θ) and x3 number of MCMC iterations
+
+Nice agreement! Previously, (see [#may-2nd-2024](meeting-minutes.md#may-2nd-2024 "mention")) using fewer data points did not lead to a match between the analytical + surrogate posteriors.
+
+### 2) P(aSF, dSF, muz, sigma0 | d ) surrogate vs "variable" surrogate
+
+
+
+Seems like the variable surrogate isnt doing so hot....
+
+
+
+
+
+
+
+
+
+\
+
 
 
 
