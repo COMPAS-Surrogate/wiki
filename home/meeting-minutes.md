@@ -6,6 +6,36 @@
 
 
 
+Weight- Manually normalise each event's weights&#x20;
+
+
+
+Is there a difference in hte Number of observations between the two COMPAS datasets ? The total predicted rates?
+
+
+
+if the difference in the rates is 32/5
+
+We have to normalise the number of binaries we create by the total star forming mass
+
+
+
+
+
+
+
+
+
+
+
+\-----
+
+* Same MCMC with LnL a few times
+* What Are KL divergences?&#x20;
+* IS this why my KL vs num training points dropping to that specific value?
+
+
+
 
 
 #### Paper draft:&#x20;
