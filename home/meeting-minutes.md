@@ -1,40 +1,101 @@
 # ⏲️ Meeting Minutes
 
+## Sept 11, 2024 (Ilya + Avi)
+
+Why are my estimates not matching Jeff's?&#x20;
+
+<div>
+
+<figure><img src="../.gitbook/assets/Screenshot 2024-09-11 at 4.01.32 PM.png" alt=""><figcaption></figcaption></figure>
+
+ 
+
+<figure><img src="../.gitbook/assets/Screenshot 2024-09-11 at 3.58.00 PM.png" alt=""><figcaption></figcaption></figure>
+
+</div>
+
+**Paper:**
+
+* Methods paper, comparison with Jeffs work
+* Proof of principle
+* We dont have to say anything about the 'true' universe, but show that we are building a pipeline for COMAS +LVK data --> results
+* Jeff alpha --> muz, Jeff Simga0--> sigma
+* CAN WE USE BOOTSTRAP LNL IN THE GP TRAINING?&#x20;
+
+
+
+
+
+## July 17, 2024 (Flatiron group meeting)
+
+Presented our project at Will Farr's GW group meeting
+
+![](<../.gitbook/assets/Screenshot 2024-09-11 at 12.29.22 PM.png>)&#x20;
+
+Got some feedback:
+
+Hey all — im visiting the CCA. I presented our work at the group meeting (hope thats fine!)Will (fairly) had concerns about\
+
+
+1. the way im cutting up the observed population (im cutting out events with median values outside our range)
+2. That we’re using SNR > 8 to help deal with selection effects, not using the search pipeline’s injection campaign&#x20;
+
+Lieke had some ideas about exploring the low mass peak.I think she was more interested in the m1-q space. I dont think that our framework will be too challenging to use m1-q.  (but again, maybe out of the scope of this paper)
+
+<figure><img src="../.gitbook/assets/ogc4_weights (1).png" alt=""><figcaption></figcaption></figure>
+
+
+
+Ilya: Indeed, we should not be arbitrarily ignoring events in a real analysis -- this is not a good way of determining which events do not match the channel. And we should work on improving our treatment of selection effects. But both are further things to tackle, not directly related to the surrogate likelihood modelling project.
+
+
+
+[\
+](https://files.slack.com/files-pri/TLLF6Q46S-F07E06KKDT7/ogc4\_weights.png)
+
+
+
+
+
+
+
+
+
 ## June 28, 2024
 
+1. **Lnl vs size of COMPAS dataset**
+
+<figure><img src="../.gitbook/assets/iTerm2.XP1LFM.lvk_lnl.png" alt=""><figcaption></figcaption></figure>
+
+* the top most plot is the likelihood that combines both the Poisson and the McZ grid,&#x20;
+* 2nd plot is the poisson LnL (looks like this follows the number of detections)&#x20;
+* 3rd plot is the McZ probability (the 5M dataset looks like it's quite different from the 32M and 512M)&#x20;
+* 4th is the number of detections.
+
+this is telling us that the 5M run was not quite sufficient to get the exact likelihood; but I suspect that, if the actual number of observations is \~35, the natural fluctuations in the likelihood from the limited number of observations is such that you aren't losing much information from the imperfect likelihood model...
+
+The differences in the predictions from 5M and 32M runs are smaller than the Poisson scatter in the number of detections. If it's about how large of a run we will need once we have N detections, this is certainly relevant info. If it's about testing your pipeline, we should be fine with the 5M run...
+
+
+
+**It's probably worth raising questions like the following in the discussion**, just to show we are aware of them, but not trying to answer them here:
+
+* What is the **optimal adaptive learning scheme**?
+* **How large** does the Monte Carlo binary population synthesis need to be to ensure that we are dominated by observational uncertainties / limited number of observations rather than by the limited number of model evaluations?
+* If the number of model evaluations is limited, what is the best way to spread them out when learning a surrogate likelihood model (a smaller number of Monte Carlo samples at a larger number of parameter space locations, or the reverse)?
 
 
 
 
-Weight- Manually normalise each event's weights&#x20;
 
 
 
-Is there a difference in hte Number of observations between the two COMPAS datasets ? The total predicted rates?
+**Meeting notes:**
 
-
-
-if the difference in the rates is 32/5
-
-We have to normalise the number of binaries we create by the total star forming mass
-
-
-
-
-
-
-
-
-
-
-
-\-----
-
-* Same MCMC with LnL a few times
-* What Are KL divergences?&#x20;
-* IS this why my KL vs num training points dropping to that specific value?
-
-
+* McZ Weights - Manually normalise each event's weights&#x20;
+* Is there a difference in the Number of observations between the two COMPAS datasets ? The total predicted rates?
+* if the difference in the rates is 32 to 5
+* We have to normalise the number of binaries we create by the total star forming mass
 
 
 
