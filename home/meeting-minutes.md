@@ -44,9 +44,11 @@ We have to normalise the number of binaries we create by the total star forming 
 
 #### Analytical check
 
+
+
+1. **P(aSF|data) analytical test:**
+
 <figure><img src="../.gitbook/assets/aSF_posterior (1).png" alt=""><figcaption></figcaption></figure>
-
-
 
 #### LVK&#x20;
 
@@ -89,6 +91,22 @@ We have to normalise the number of binaries we create by the total star forming 
 {% file src="../.gitbook/assets/LNLs_32M_50000_780pts.pdf" %}
 
 {% file src="../.gitbook/assets/LNLs_32M_500000_780pts.pdf" %}
+
+
+
+
+
+2. **"feasibility" regions:**
+
+Still working on it... [toy model code here](https://github.com/COMPAS-Surrogate/active\_learning\_feasability\_region).
+
+<figure><img src="../.gitbook/assets/Screenshot 2024-05-16 at 8.41.40 am.png" alt=""><figcaption></figcaption></figure>
+
+
+
+| Npts=10                                                                | Npts=30                                                                |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| <img src="../.gitbook/assets/npts_10.png" alt="" data-size="original"> | <img src="../.gitbook/assets/npts_30.png" alt="" data-size="original"> |
 
 
 
