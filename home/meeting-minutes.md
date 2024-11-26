@@ -4,15 +4,11 @@
 
 Why are my estimates not matching Jeff's?&#x20;
 
-<div>
+<div><figure><img src="../.gitbook/assets/Screenshot 2024-09-11 at 4.01.32 PM.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/Screenshot 2024-09-11 at 3.58.00 PM.png" alt=""><figcaption><p>jeff's alpha=mu_z, jeffs sigma=sigma_0</p></figcaption></figure></div>
 
-<figure><img src="../.gitbook/assets/Screenshot 2024-09-11 at 4.01.32 PM.png" alt=""><figcaption></figcaption></figure>
+<div><figure><img src="../.gitbook/assets/avi_params_32M.png" alt=""><figcaption><p>Avi's median params</p></figcaption></figure> <figure><img src="../.gitbook/assets/jeff_params_32M.png" alt=""><figcaption><p>Jeff's median params</p></figcaption></figure></div>
 
- 
 
-<figure><img src="../.gitbook/assets/Screenshot 2024-09-11 at 3.58.00 PM.png" alt=""><figcaption></figcaption></figure>
-
-</div>
 
 **Paper:**
 
@@ -51,7 +47,7 @@ Ilya: Indeed, we should not be arbitrarily ignoring events in a real analysis --
 
 
 [\
-](https://files.slack.com/files-pri/TLLF6Q46S-F07E06KKDT7/ogc4\_weights.png)
+](https://files.slack.com/files-pri/TLLF6Q46S-F07E06KKDT7/ogc4_weights.png)
 
 
 
@@ -173,7 +169,7 @@ I've been trying to validate the surrogate model.&#x20;
 
 2. **"feasibility" regions:**
 
-Still working on it... [toy model code here](https://github.com/COMPAS-Surrogate/active\_learning\_feasability\_region).
+Still working on it... [toy model code here](https://github.com/COMPAS-Surrogate/active_learning_feasability_region).
 
 <figure><img src="../.gitbook/assets/Screenshot 2024-05-16 at 8.41.40 am.png" alt=""><figcaption></figcaption></figure>
 
@@ -226,15 +222,7 @@ Seems like the variable surrogate isnt doing so hot....
 
     <figure><img src="../.gitbook/assets/aSF_posterior.png" alt=""><figcaption></figcaption></figure>
 
-    <div>
-
-    <figure><img src="../.gitbook/assets/round_round0_10pts.png" alt=""><figcaption></figcaption></figure>
-
-     
-
-    <figure><img src="../.gitbook/assets/round_round1_15pts.png" alt=""><figcaption></figcaption></figure>
-
-    </div>
+    <div><figure><img src="../.gitbook/assets/round_round0_10pts.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/round_round1_15pts.png" alt=""><figcaption></figcaption></figure></div>
 
 
 
@@ -381,15 +369,15 @@ From Ilya (COMPAS slack, April 23rd)
 
 {% tabs %}
 {% tab title="aSF" %}
-| Corners                             | KL-Distance                                     |
-| ----------------------------------- | ----------------------------------------------- |
-| ![](../.gitbook/assets/corners.gif) | ![](<../.gitbook/assets/kl\_distances (4).png>) |
+| Corners                             | KL-Distance                                    |
+| ----------------------------------- | ---------------------------------------------- |
+| ![](../.gitbook/assets/corners.gif) | ![](<../.gitbook/assets/kl_distances (4).png>) |
 {% endtab %}
 
 {% tab title="dSF" %}
-| Corners                                                                    | KL-Distance                                         |
-| -------------------------------------------------------------------------- | --------------------------------------------------- |
-| <img src="../.gitbook/assets/corners_dsf.gif" alt="" data-size="original"> | ![](<../.gitbook/assets/kl\_distances (1) (1).png>) |
+| Corners                                                                    | KL-Distance                                        |
+| -------------------------------------------------------------------------- | -------------------------------------------------- |
+| <img src="../.gitbook/assets/corners_dsf.gif" alt="" data-size="original"> | ![](<../.gitbook/assets/kl_distances (1) (1).png>) |
 {% endtab %}
 
 {% tab title="mu_z" %}
@@ -409,9 +397,9 @@ From Ilya (COMPAS slack, April 23rd)
 
 #### aSF-dSF
 
-| Acquired points                                       | GP mean                                                | Posterior                                         | KL Distance                                                                     |
-| ----------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------- |
-| ![](<../.gitbook/assets/eval\_round2\_47pts (1).png>) | ![](<../.gitbook/assets/round\_round2\_47pts (1).png>) | ![](../.gitbook/assets/round2\_47pts\_corner.png) | <img src="../.gitbook/assets/kl_distances (1).png" alt="" data-size="original"> |
+| Acquired points                                     | GP mean                                              | Posterior                                       | KL Distance                                                                     |
+| --------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------- |
+| ![](<../.gitbook/assets/eval_round2_47pts (1).png>) | ![](<../.gitbook/assets/round_round2_47pts (1).png>) | ![](../.gitbook/assets/round2_47pts_corner.png) | <img src="../.gitbook/assets/kl_distances (1).png" alt="" data-size="original"> |
 
 _<mark style="color:red;">negative KL distance?</mark>_
 
@@ -421,23 +409,7 @@ _<mark style="color:red;">negative KL distance?</mark>_
 
 #### muz-sigma0
 
-<div>
-
-<figure><img src="../.gitbook/assets/kl_distances (2).png" alt=""><figcaption></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/bo_metrics_round2_55pts.png" alt=""><figcaption></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/eval_round2_55pts.png" alt=""><figcaption></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/round_round2_55pts.png" alt=""><figcaption></figcaption></figure>
-
-</div>
+<div><figure><img src="../.gitbook/assets/kl_distances (2).png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/bo_metrics_round2_55pts.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/eval_round2_55pts.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/round_round2_55pts.png" alt=""><figcaption></figcaption></figure></div>
 
 
 
@@ -455,81 +427,29 @@ niterations = 1000, nwalkers = 10
 
 **Corners**
 
-<div>
-
-<figure><img src="../.gitbook/assets/round1_20pts_corner.png" alt=""><figcaption><p>20 pts</p></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/round12_75pts_corner.png" alt=""><figcaption><p>75 pts</p></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/round16_95pts_corner.png" alt=""><figcaption><p>95 pts</p></figcaption></figure>
-
-</div>
+<div><figure><img src="../.gitbook/assets/round1_20pts_corner.png" alt=""><figcaption><p>20 pts</p></figcaption></figure> <figure><img src="../.gitbook/assets/round12_75pts_corner.png" alt=""><figcaption><p>75 pts</p></figcaption></figure> <figure><img src="../.gitbook/assets/round16_95pts_corner.png" alt=""><figcaption><p>95 pts</p></figcaption></figure></div>
 
 **Training points acquired**
 
-<div>
-
-<figure><img src="../.gitbook/assets/eval_round1_20pts.png" alt=""><figcaption><p>20 pts</p></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/eval_round12_75pts.png" alt=""><figcaption><p>75 pts</p></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/eval_round16_95pts.png" alt=""><figcaption><p>95 pts</p></figcaption></figure>
-
-</div>
+<div><figure><img src="../.gitbook/assets/eval_round1_20pts.png" alt=""><figcaption><p>20 pts</p></figcaption></figure> <figure><img src="../.gitbook/assets/eval_round12_75pts.png" alt=""><figcaption><p>75 pts</p></figcaption></figure> <figure><img src="../.gitbook/assets/eval_round16_95pts.png" alt=""><figcaption><p>95 pts</p></figcaption></figure></div>
 
 **Kl Distance + Regret**
 
-<div>
-
-<figure><img src="../.gitbook/assets/kl_distances.png" alt=""><figcaption></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/bo_metrics_round16_95pts.png" alt=""><figcaption></figcaption></figure>
-
-</div>
+<div><figure><img src="../.gitbook/assets/kl_distances.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/bo_metrics_round16_95pts.png" alt=""><figcaption></figcaption></figure></div>
 
 
 
 ### Trying again with more points...
 
-|                                                     |                                                 |
-| --------------------------------------------------- | ----------------------------------------------- |
-| ![](../.gitbook/assets/round23\_250pts\_corner.png) | ![](<../.gitbook/assets/kl\_distances (3).png>) |
+|                                                   |                                                |
+| ------------------------------------------------- | ---------------------------------------------- |
+| ![](../.gitbook/assets/round23_250pts_corner.png) | ![](<../.gitbook/assets/kl_distances (3).png>) |
 
 ### Trying with a 'deep' GP
 
 
 
-<div>
-
-<figure><img src="../.gitbook/assets/round0_30pts_corner.png" alt=""><figcaption><p>30</p></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/round3_90pts_corner.png" alt=""><figcaption><p>90</p></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/round9_210pts_corner.png" alt=""><figcaption><p>210</p></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/round24_510pts_corner.png" alt=""><figcaption><p>510</p></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/round59_1210pts_corner.png" alt=""><figcaption><p>1210</p></figcaption></figure>
-
-</div>
+<div><figure><img src="../.gitbook/assets/round0_30pts_corner.png" alt=""><figcaption><p>30</p></figcaption></figure> <figure><img src="../.gitbook/assets/round3_90pts_corner.png" alt=""><figcaption><p>90</p></figcaption></figure> <figure><img src="../.gitbook/assets/round9_210pts_corner.png" alt=""><figcaption><p>210</p></figcaption></figure> <figure><img src="../.gitbook/assets/round24_510pts_corner.png" alt=""><figcaption><p>510</p></figcaption></figure> <figure><img src="../.gitbook/assets/round59_1210pts_corner.png" alt=""><figcaption><p>1210</p></figcaption></figure></div>
 
 <figure><img src="../.gitbook/assets/kl_distances (5).png" alt="" width="320"><figcaption></figcaption></figure>
 
@@ -575,7 +495,7 @@ Things to go over:
     * run PE using LnL surrogate **(stop using some automated critera)**
     * Compare corners + make PP plots -- are posteriors sensible?
 
-**Code for simulation studies:** [https://github.com/COMPAS-Surrogate/simulation\_study](https://github.com/COMPAS-Surrogate/simulation\_study)&#x20;
+**Code for simulation studies:** [https://github.com/COMPAS-Surrogate/simulation\_study](https://github.com/COMPAS-Surrogate/simulation_study)&#x20;
 
 ### 1) Multimodal LnL
 
@@ -589,13 +509,13 @@ Bimodal example
 | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_explore.gif" alt="Exploratory" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_exploit.gif" alt="Exploitative" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_both.gif" alt="Combined" data-size="original"> |
 
-![](https://compas-surrogate.github.io/lnl\_surrogate/\_images/regret\_multi.png)
+![](https://compas-surrogate.github.io/lnl_surrogate/_images/regret_multi.png)
 
 | Exploratory Acquisition                                                                                                             | Exploitative Acquisition                                                                                                             | Combined Acquisition                                                                                                          |
 | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_explore.gif" alt="Exploratory" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_exploit.gif" alt="Exploitative" data-size="original"> | <img src="https://compas-surrogate.github.io/lnl_surrogate/_images/train_multi_both.gif" alt="Combined" data-size="original"> |
 
-![](https://compas-surrogate.github.io/lnl\_surrogate/\_images/regret\_multi.png)
+![](https://compas-surrogate.github.io/lnl_surrogate/_images/regret_multi.png)
 
 
 
@@ -605,41 +525,13 @@ Bimodal example
 
 
 
-<div>
-
-<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd0.png" alt=""><figcaption></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd1.png" alt=""><figcaption></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd2.png" alt=""><figcaption></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd3.png" alt=""><figcaption></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/true_vs_surrogate_rnd4.png" alt=""><figcaption></figcaption></figure>
-
-</div>
+<div><figure><img src="../.gitbook/assets/true_vs_surrogate_rnd0.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/true_vs_surrogate_rnd1.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/true_vs_surrogate_rnd2.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/true_vs_surrogate_rnd3.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/true_vs_surrogate_rnd4.png" alt=""><figcaption></figcaption></figure></div>
 
 <figure><img src="../.gitbook/assets/regret_vs_kl (1).png" alt=""><figcaption></figcaption></figure>
 
 **Repeating 50 times:**
 
-<div>
-
-<figure><img src="../.gitbook/assets/kl_divergence.png" alt=""><figcaption><p>KL Div decreases as we expect </p></figcaption></figure>
-
- 
-
-<figure><img src="../.gitbook/assets/error_histogram.png" alt=""><figcaption><p>By iteration~15 we've reached the peak of the LnL surface</p></figcaption></figure>
-
-</div>
+<div><figure><img src="../.gitbook/assets/kl_divergence.png" alt=""><figcaption><p>KL Div decreases as we expect </p></figcaption></figure> <figure><img src="../.gitbook/assets/error_histogram.png" alt=""><figcaption><p>By iteration~15 we've reached the peak of the LnL surface</p></figcaption></figure></div>
 
 Looks like the the mix of exploration + exploitation seems to work? There is probably room for improvement here....
 
@@ -813,9 +705,9 @@ The `self.n_detections(duration)`--> 0 leading to the nan
 
 ### Summary
 
-* [Example of 'minimum' LnL training points and model predictions over iterations](https://compas-surrogate.github.io/lnl\_surrogate/README.html) ![](https://raw.githubusercontent.com/COMPAS-Surrogate/lnl\_surrogate/main/docs/studies/regret.png)
+* [Example of 'minimum' LnL training points and model predictions over iterations](https://compas-surrogate.github.io/lnl_surrogate/README.html) ![](https://raw.githubusercontent.com/COMPAS-Surrogate/lnl_surrogate/main/docs/studies/regret.png)
 * [1D sf example](https://compas-surrogate.github.io/pipeline/studies/1D/1D.html) The 'errors' are much larger... hmm
-* [2D sf example](https://github.com/COMPAS-Surrogate/pipeline/blob/main/scripts/two\_dim/bo\_v2.py)... sorry, forgot to include model predictions! ![lnl\_error](https://github.com/COMPAS-Surrogate/pipeline/assets/15642823/7ef87183-c62f-4c45-b23c-5990d91256af)
+* [2D sf example](https://github.com/COMPAS-Surrogate/pipeline/blob/main/scripts/two_dim/bo_v2.py)... sorry, forgot to include model predictions! ![lnl\_error](https://github.com/COMPAS-Surrogate/pipeline/assets/15642823/7ef87183-c62f-4c45-b23c-5990d91256af)
 
 Params are `aSF, dSF` ![round\_round3](https://github.com/COMPAS-Surrogate/pipeline/assets/15642823/e86bad5b-fad4-4684-8913-5e92ff0c660a)
 
@@ -950,7 +842,7 @@ This is a 'regret' plot looking at different acquisition functions. The red line
 * Avi's main progress Dec 12-14:
   * Refactor LnL computation
   * slurm utils for pipeline
-  * faster acquisition function test cases [(see this test)](https://github.com/COMPAS-Surrogate/pipeline/blob/main/tests/test\_aSF\_1d\_pipeline.py)
+  * faster acquisition function test cases [(see this test)](https://github.com/COMPAS-Surrogate/pipeline/blob/main/tests/test_aSF_1d_pipeline.py)
 * QUESTIONS:
   * Multiple dimension acquisition function?
   * Go over params to be used--> \["aSF", "dSF", "mu\_z", "sigma\_z"]??
@@ -991,7 +883,7 @@ All repos here: https://github.com/COMPAS-Surrogate/
 
 ### COMPAS surrogate results
 
-* Without incorporating LnL uncertainty, results "look" ok, but the validation error is high (overfitting) ![](https://avivajpeyi.github.io/compas\_al\_expts/\_images/sampling\_summary.png)
+* Without incorporating LnL uncertainty, results "look" ok, but the validation error is high (overfitting) ![](https://avivajpeyi.github.io/compas_al_expts/_images/sampling_summary.png)
 * LnL + unc surrogate has a high training error (even with some random points)
 * **Something is going wrong in the GP surrogate model.**
 
@@ -1029,7 +921,7 @@ Currently testing with `GPFlow` (a 'deep' GP) and `sklearn.GP`
 
 ### Acquisition functions:
 
-Instead of coding our [own](https://avivajpeyi.github.io/compas\_al\_expts/al\_and\_gps.html), maybe we can leverage pre-existing BO tools? (note: some of these require a GP to be trained using an MCMC)
+Instead of coding our [own](https://avivajpeyi.github.io/compas_al_expts/al_and_gps.html), maybe we can leverage pre-existing BO tools? (note: some of these require a GP to be trained using an MCMC)
 
 * https://modal-python.readthedocs.io/en/latest/content/examples/active\_regression.html?highlight=regression%20multiple%20dimension#Active-regression
 * https://gpax.readthedocs.io/en/latest/examples.html
@@ -1117,18 +1009,18 @@ Tests for increasing number of bootstraps
 
 ## Aug 23, 2023
 
-|                                                                                                                     |                                                                                                                     |                                                                                                                      |                                                                                                                     |
-| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| ![d1\_ei](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/2cda4d1b-6cb0-4ce5-96b5-48d9cbf0790c) | ![d1\_th](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/97bc210f-c29c-4b12-8c7f-a3bb8b5abd47) | ![d1\_ucb](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/e1943785-7ea4-4079-99d3-29abb2041a1d) | ![d1\_ue](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/9f6a16cb-0be3-4a0c-8472-53e30e3bcc63) |
-| ![d2\_ei](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/7ef729fc-8f95-40cb-b1a2-e1171eceec43) | ![d2\_th](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/7e9a36a5-d4d6-4593-a9d3-2ce706ccb5dc) | ![d2\_ucb](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/42e89e23-1e5b-44e0-a78b-259f52869c16) | ![d2\_ue](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/bd35eded-89c0-4f5c-a080-04010230e463) |
-| ![d3\_ei](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/da7ad5b4-820b-4ce9-9680-1cf7cd50ed4f) | ![d3\_th](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/aa33ad19-e249-44d8-b5ee-f628a12266a8) | ![d3\_ucb](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/d6184215-0e05-4388-88bb-82228ea6b200) | ![d3\_ue](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/2691afbf-76d5-4168-b6e5-d5a210f31a2e) |
+|                                                                                                                   |                                                                                                                   |                                                                                                                    |                                                                                                                   |
+| ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| ![d1\_ei](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/2cda4d1b-6cb0-4ce5-96b5-48d9cbf0790c) | ![d1\_th](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/97bc210f-c29c-4b12-8c7f-a3bb8b5abd47) | ![d1\_ucb](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/e1943785-7ea4-4079-99d3-29abb2041a1d) | ![d1\_ue](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/9f6a16cb-0be3-4a0c-8472-53e30e3bcc63) |
+| ![d2\_ei](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/7ef729fc-8f95-40cb-b1a2-e1171eceec43) | ![d2\_th](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/7e9a36a5-d4d6-4593-a9d3-2ce706ccb5dc) | ![d2\_ucb](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/42e89e23-1e5b-44e0-a78b-259f52869c16) | ![d2\_ue](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/bd35eded-89c0-4f5c-a080-04010230e463) |
+| ![d3\_ei](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/da7ad5b4-820b-4ce9-9680-1cf7cd50ed4f) | ![d3\_th](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/aa33ad19-e249-44d8-b5ee-f628a12266a8) | ![d3\_ucb](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/d6184215-0e05-4388-88bb-82228ea6b200) | ![d3\_ue](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/2691afbf-76d5-4168-b6e5-d5a210f31a2e) |
 
-|     | D1                                                                                                                   | D2                                                                                                                   | D3                                                                                                                   |
-| --- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| EI  | ![d1\_ei](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/2cda4d1b-6cb0-4ce5-96b5-48d9cbf0790c)  | ![d2\_ei](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/7ef729fc-8f95-40cb-b1a2-e1171eceec43)  | ![d3\_ei](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/da7ad5b4-820b-4ce9-9680-1cf7cd50ed4f)  |
-| TH  | ![d1\_th](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/97bc210f-c29c-4b12-8c7f-a3bb8b5abd47)  | ![d2\_th](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/7e9a36a5-d4d6-4593-a9d3-2ce706ccb5dc)  | ![d3\_th](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/aa33ad19-e249-44d8-b5ee-f628a12266a8)  |
-| UCB | ![d1\_ucb](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/e1943785-7ea4-4079-99d3-29abb2041a1d) | ![d2\_ucb](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/42e89e23-1e5b-44e0-a78b-259f52869c16) | ![d3\_ucb](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/d6184215-0e05-4388-88bb-82228ea6b200) |
-| UE  | ![d1\_ue](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/9f6a16cb-0be3-4a0c-8472-53e30e3bcc63)  | ![d2\_ue](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/bd35eded-89c0-4f5c-a080-04010230e463)  | ![d3\_ue](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/2691afbf-76d5-4168-b6e5-d5a210f31a2e)  |
+|     | D1                                                                                                                 | D2                                                                                                                 | D3                                                                                                                 |
+| --- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| EI  | ![d1\_ei](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/2cda4d1b-6cb0-4ce5-96b5-48d9cbf0790c)  | ![d2\_ei](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/7ef729fc-8f95-40cb-b1a2-e1171eceec43)  | ![d3\_ei](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/da7ad5b4-820b-4ce9-9680-1cf7cd50ed4f)  |
+| TH  | ![d1\_th](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/97bc210f-c29c-4b12-8c7f-a3bb8b5abd47)  | ![d2\_th](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/7e9a36a5-d4d6-4593-a9d3-2ce706ccb5dc)  | ![d3\_th](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/aa33ad19-e249-44d8-b5ee-f628a12266a8)  |
+| UCB | ![d1\_ucb](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/e1943785-7ea4-4079-99d3-29abb2041a1d) | ![d2\_ucb](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/42e89e23-1e5b-44e0-a78b-259f52869c16) | ![d3\_ucb](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/d6184215-0e05-4388-88bb-82228ea6b200) |
+| UE  | ![d1\_ue](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/9f6a16cb-0be3-4a0c-8472-53e30e3bcc63)  | ![d2\_ue](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/bd35eded-89c0-4f5c-a080-04010230e463)  | ![d3\_ue](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/2691afbf-76d5-4168-b6e5-d5a210f31a2e)  |
 
 ```
 
@@ -1171,8 +1063,8 @@ Tests for increasing number of bootstraps
 #### Methods/Algos
 
 1. uncertainty-based sampling: least confident ([Lewis and Catlett](https://www.sciencedirect.com/science/article/pii/B978155860335650026X?via%3Dihub)), max margin and max entropy
-2. committee-based algorithms: vote entropy, consensus entropy and max disagreement ([Cohn et al.](http://www.cs.northwestern.edu/\~pardo/courses/mmml/papers/active\_learning/improving\_generalization\_with\_active\_learning\_ML94.pdf))
-3. multilabel strategies: SVM binary minimum ([Brinker](https://link.springer.com/chapter/10.1007%2F3-540-31314-1\_24)), max loss, mean max loss, ([Li et al.](http://dx.doi.org/10.1109/ICIP.2004.1421535)) MinConfidence, MeanConfidence, MinScore, MeanScore ([Esuli and Sebastiani](http://dx.doi.org/10.1007/978-3-642-00958-7\_12))
+2. committee-based algorithms: vote entropy, consensus entropy and max disagreement ([Cohn et al.](http://www.cs.northwestern.edu/~pardo/courses/mmml/papers/active_learning/improving_generalization_with_active_learning_ML94.pdf))
+3. multilabel strategies: SVM binary minimum ([Brinker](https://link.springer.com/chapter/10.1007%2F3-540-31314-1_24)), max loss, mean max loss, ([Li et al.](http://dx.doi.org/10.1109/ICIP.2004.1421535)) MinConfidence, MeanConfidence, MinScore, MeanScore ([Esuli and Sebastiani](http://dx.doi.org/10.1007/978-3-642-00958-7_12))
 4. expected error reduction: binary and log loss ([Roy and McCallum](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.588.5666\&rep=rep1\&type=pdf))
 5. Bayesian optimization: probability of improvement, expected improvement and upper confidence bound ([Snoek et al.](https://papers.nips.cc/paper/4522-practical-bayesian-optimization-of-machine-learning-algorithms.pdf))
 6. batch active learning: ranked batch-mode sampling ([Cardoso et al.](https://www.sciencedirect.com/science/article/pii/S0020025516313949))
@@ -1193,12 +1085,12 @@ Tests for increasing number of bootstraps
 #### Bayesian active learning
 
 * [Deep Bayesian Active Learning with Image Data](https://arxiv.org/pdf/1703.02910.pdf) (Gal and Islam and Ghahramani, 2017) Fundamental paper on how to do Bayesian active learning.
-* [Sampling bias in active learning](http://cseweb.ucsd.edu/\~dasgupta/papers/twoface.pdf) (Dasgupta 2009) Presents sampling bias and how to solve it by combining heuristics and random selection.
+* [Sampling bias in active learning](http://cseweb.ucsd.edu/~dasgupta/papers/twoface.pdf) (Dasgupta 2009) Presents sampling bias and how to solve it by combining heuristics and random selection.
 * [Bayesian Active Learning for Classification and Preference Learning](https://arxiv.org/pdf/1112.5745.pdf) (Houlsby et al. 2011) Fundamental paper on one of the main heuristic BALD.
 
 #### GP and active learning
 
-* [Exploration of lattice Hamiltonians for functional and structural discovery via Gaussian process-based exploration–exploitation](https://pubs.aip.org/aip/jap/article/128/16/164304/568362/Exploration-of-lattice-Hamiltonians-for-functional) ![](https://miro.medium.com/v2/resize:fit:1400/format:webp/1\*FwG-cE5ABw\_KMUrkJ\_o2vQ.jpeg)
+* [Exploration of lattice Hamiltonians for functional and structural discovery via Gaussian process-based exploration–exploitation](https://pubs.aip.org/aip/jap/article/128/16/164304/568362/Exploration-of-lattice-Hamiltonians-for-functional) ![](https://miro.medium.com/v2/resize:fit:1400/format:webp/1*FwG-cE5ABw_KMUrkJ_o2vQ.jpeg)
 * [Active Learning for Deep Gaussian Process Surrogates](https://www.tandfonline.com/doi/full/10.1080/00401706.2021.2008505)
 * [Actively learning GP dynamics](https://arxiv.org/abs/1911.09946)
 
@@ -1214,8 +1106,8 @@ Tests for increasing number of bootstraps
 
 * [Google's Active Learning Playground](https://github.com/google/active-learning): This is a python module for experimenting with different active learning algorithms.
 * [deep-active-learning](https://github.com/ej0cl6/deep-active-learning): Python implementations of the following active learning algorithms
-* [PyTorch Active Learning](https://github.com/rmunro/pytorch\_active\_learning): Library for common Active Learning methods
-* [active-learning-workshop](https://github.com/Azure/active-learning-workshop):KDD 2018 Hands-on Tutorial: Active learning and transfer learning at scale with R and Python. [PDF](https://github.com/Azure/active-learning-workshop/blob/master/active\_learning\_workshop.pdf)
+* [PyTorch Active Learning](https://github.com/rmunro/pytorch_active_learning): Library for common Active Learning methods
+* [active-learning-workshop](https://github.com/Azure/active-learning-workshop):KDD 2018 Hands-on Tutorial: Active learning and transfer learning at scale with R and Python. [PDF](https://github.com/Azure/active-learning-workshop/blob/master/active_learning_workshop.pdf)
 
 ### Codebases
 
@@ -1245,13 +1137,13 @@ A " Bayesian active learning library" Built on pytorch Seems like focus on image
 
 5. adaptive
 
-> Adaptive sampling technique for 'learning' functional representation of the data https://adaptive.readthedocs.io/en/latest/index.html ![](https://adaptive.readthedocs.io/en/latest/\_static/logo\_docs.webm) https://github.com/python-adaptive/adaptive/tree/v1.0.0
+> Adaptive sampling technique for 'learning' functional representation of the data https://adaptive.readthedocs.io/en/latest/index.html ![](https://adaptive.readthedocs.io/en/latest/_static/logo_docs.webm) https://github.com/python-adaptive/adaptive/tree/v1.0.0
 
 6. AliPy Agnostic of pytorch/sklearn/tflow
 
 https://github.com/NUAA-AL/alipy
 
-7. libact Features the [active learning by learning](http://www.csie.ntu.edu.tw/\~htlin/paper/doc/aaai15albl.pdf) meta-strategy that allows the machine to automatically learn the best strategy on the fly.
+7. libact Features the [active learning by learning](http://www.csie.ntu.edu.tw/~htlin/paper/doc/aaai15albl.pdf) meta-strategy that allows the machine to automatically learn the best strategy on the fly.
 
 Works with sklearn
 
@@ -1261,14 +1153,14 @@ Hasnt been updated in 2 years https://github.com/ntucllab/libact
 
 **1. LnL surface smooth** Ilya helped me find a bug, Lnl surface now looks smooth! woohoo!
 
-![surface](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/8148ed8c-8a4d-455b-9aa2-3146d14c4d2f)
+![surface](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/8148ed8c-8a4d-455b-9aa2-3146d14c4d2f)
 
 **2. bootstrapped uncertainty**
 
 * generate additional COMPAS datasets\* and compute LnL
 * use different Lnl to estimate a mean + std (to use in the GP uncertainty)
 
-![sigma0\_lnl](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/6bbc96e8-02dc-40b9-a618-2502e15862c1) ![muz\_lnl](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/6dd8b01d-7631-4175-8aac-d151ce3cfba6)
+![sigma0\_lnl](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/6bbc96e8-02dc-40b9-a618-2502e15862c1) ![muz\_lnl](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/6dd8b01d-7631-4175-8aac-d151ce3cfba6)
 
 **3. some injections**
 
@@ -1276,7 +1168,7 @@ Percentile-percentile plot made using 50 sets of {aSF, dSF, mu0, sigma0} posteri
 
 Posteriors were generated by running inference w/ nested sampling on 50 mock BBH catalogs with our sklearn-GP trained lnLikelihood(aSF, dSF, mu0, sigma0 | mock BBH catalog). The sklearn-GP was given 1600 training points (and a bootstrapped LnL uncertainty). I used very low sampler settings to get things running quickly (nlive=250,)
 
-![pp\_plot](https://github.com/avivajpeyi/compas\_ml\_surrogate/assets/15642823/7e72b7cb-903b-45ba-bb44-297bab339d39)
+![pp\_plot](https://github.com/avivajpeyi/compas_ml_surrogate/assets/15642823/7e72b7cb-903b-45ba-bb44-297bab339d39)
 
 ***
 
