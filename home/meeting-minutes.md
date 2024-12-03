@@ -10,13 +10,11 @@
 
 Using OGC3,
 
-
-
 * Filtering by Obserinv Run (only O3): \[94 -> 78]
 * Filtering events with Pastro > 0.95: \[78 -> 51]
 * Filtering events with valid mcz: \[51 -> 45]
 
-
+<figure><img src="../.gitbook/assets/event_mcz_estimates_only_o3.png" alt=""><figcaption></figcaption></figure>
 
 
 
