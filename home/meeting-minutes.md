@@ -1,5 +1,74 @@
 # ⏲️ Meeting Minutes
 
+## XX Dec
+
+**Jeff's LVK dataset:**
+
+<figure><img src="../.gitbook/assets/Screenshot 2024-12-03 at 12.16.47 PM.png" alt=""><figcaption></figcaption></figure>
+
+> LVK observations from observing runs 3a and 3b (run duration 275.3 days), where pastro  0.95 (52 events).
+
+Using OGC3,
+
+
+
+* Filtering by Obserinv Run (only O3): \[94 -> 78]
+* Filtering events with Pastro > 0.95: \[78 -> 51]
+* Filtering events with valid mcz: \[51 -> 45]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##
+
+## 27 NOV
+
+**Action items:**
+
+1. **What is the sampling/statistical uncertainty?**&#x20;
+
+If we sample using the surrogate LnL (trained with large number of GP points), does the JS div settle at some point?
+
+<figure><img src="../.gitbook/assets/Screenshot 2024-12-03 at 12.21.15 PM.png" alt=""><figcaption></figcaption></figure>
+
+2. Differences in Jeff + Avis aSF posterior:
+
+Likely due to the differences in the data + duration used. \
+Lets try to make them as similar as possible...
+
+
+
+**Meeting notes:**
+
+* Train LnL, run MCMC N times (different random seed), see the divergence between the different plot \
+  See what the typical JS diveregence is just from samplinng
+* Difference in Jeff + Avi's poseriors, duratio normalisation
+* Also what is the size of the COMPAS dataset we are using&#x20;
+* **KEY QUESTIONS:**
+  * Experimental design:&#x20;
+    * How to choose COMPAS models (eg acquisition function
+    * How to most computationally efficetly approximmate true landscape in regions of high LnL
+    * How many binaries do we really need to run?
+
+##
+
+##
+
+##
+
 ## Sept 11, 2024 (Ilya + Avi)
 
 Why are my estimates not matching Jeff's?&#x20;
