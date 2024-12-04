@@ -1,6 +1,6 @@
 # ⏲️ Meeting Minutes
 
-## XX Dec
+## 4 Dec
 
 **Jeff's LVK dataset:**
 
@@ -8,13 +8,23 @@
 
 > LVK observations from observing runs 3a and 3b (run duration 275.3 days), where pastro  0.95 (52 events).
 
-Using OGC3,
-
-* Filtering by Obserinv Run (only O3): \[94 -> 78]
-* Filtering events with Pastro > 0.95: \[78 -> 51]
-* Filtering events with valid mcz: \[51 -> 45]
+* Number of events (using OGC4)
+  * Filtering by Obserinv Run (only O3): \[94 -> 78]
+  * Filtering events with Pastro > 0.95: \[78 -> 51]
+  * Filtering events with valid mcz: \[51 -> 45]
+* Duration of observing run
+  * Jeff used 275.3 days
+  * GWOSC coincident data from LIGO-H1, LIGO-L1: 243.4 days
+  * Ref: [O3a](https://gwosc.org/timeline/show/O3a_4KHZ_R1/H1_DATA*L1_DATA/), [O3b](https://gwosc.org/timeline/show/O3b_4KHZ_R1/H1_DATA*L1_DATA/)
+* Selection FX
+  * [ we use O3 data but use ‘design’ sensitivity by default](https://github.com/TeamCOMPAS/COMPAS/blob/dev/compas_python_utils/cosmic_integration/selection_effects.py).
+  * What did Jeff use for the `selection fx`?
 
 <figure><img src="../.gitbook/assets/event_mcz_estimates_only_o3.png" alt=""><figcaption></figcaption></figure>
+
+My previous analysis used 57 events.
+
+
 
 
 
