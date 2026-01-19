@@ -1,6 +1,72 @@
 # ⏲️ Meeting Minutes
 
-## 4 Dec
+## Jan 20, 2026
+
+### **Goal:** reproduce same corners' as those in Jeff's paper (from the simulation study section).&#x20;
+
+
+
+
+
+#### Challenges — things dont seem to be matching up. (see discussions from June 12 2025):
+
+According to the paper: \
+λ(α, σ, aSF , dSF ) = (−0.325, 0.213, 0.012, 4.253)\
+obs\_duration = 1 year ( 365.25 days)\
+\
+The weights from the dataset (obtained from Ilya) are plotted on the left.\
+\
+The output of Jeff's code `python rateSampler.py -a −0.325 -s 0.213 -A 0.012 -D 4.253` \
+(ie at the true value)  is plotted on the right\
+np.sum(rate\_matrix)\~ 730\
+Ie rate of 730/year != expected rate of 578/year<br>
+
+![](../.gitbook/assets/image.png)
+
+
+
+
+
+#### Plan: Generate a similar dataset using same true params.
+
+From Ilya (July 11th):
+
+One concern is that something in the post-processing script has changed in more serious ways than we anticipated.  If that's true, then the mock data catalog was effectively drawn from a different model than the one you used to compute a likelihood, and all bets are off.  Jeff will investigate this once he is back in Australia (and I am checking our post-processing in parallel for another reason), but let's not delay your work in the meantime.\
+So here's my proposal.<br>
+
+* Run the post-processing (still using Jeff's data) for Jeff's choice of "true" parameter values.
+* Create your own mock catalog from that.  It won't be the same as Jeff's, so you won't be able to compare with his results, but at least it will be self-consistent.
+* As a first step, don't include any measurement uncertainties -- pretend all measurements of individual events yield perfect parameters (just like Jeff initially did).
+* Carry out inference.  Are the true values now within your credible intervals?  Are the credible intervals sensible (e.g., as we discussed earlier, the fractional uncertainty on sfA should be around 1/sqrt{# observations}, maybe a tad larger because of parameter correlations).
+
+
+
+**Results still not matching up**
+
+I tried the above, but corner plots didn't look great! Taking a step back...\
+Going back to some sanity checks (looking at events as delta functions — no posterior uncertainty)
+
+**Brute force check with 0.1 years dataset, no posterior uncertainty (\~75 events):**
+
+<div><figure><img src="../.gitbook/assets/data_matrix_0.1yr.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/expected_matrix_0.1yr (1).png" alt=""><figcaption></figcaption></figure></div>
+
+
+
+
+
+1D scan (keeping all params at true, varying one param)
+
+<figure><img src="../.gitbook/assets/lnl_1d_scan.png" alt=""><figcaption></figcaption></figure>
+
+
+
+
+
+
+
+
+
+## 4 Dec 2025
 
 **Jeff's LVK dataset:**
 
@@ -71,11 +137,11 @@ Lets try to make them as similar as possible...
     * How to most computationally efficetly approximmate true landscape in regions of high LnL
     * How many binaries do we really need to run?
 
-##
 
-##
 
-##
+
+
+
 
 ## Sept 11, 2024 (Ilya + Avi)
 
@@ -107,8 +173,7 @@ Presented our project at Will Farr's GW group meeting
 
 Got some feedback:
 
-Hey all — im visiting the CCA. I presented our work at the group meeting (hope thats fine!)Will (fairly) had concerns about\
-
+Hey all — im visiting the CCA. I presented our work at the group meeting (hope thats fine!)Will (fairly) had concerns about<br>
 
 1. the way im cutting up the observed population (im cutting out events with median values outside our range)
 2. That we’re using SNR > 8 to help deal with selection effects, not using the search pipeline’s injection campaign&#x20;
@@ -123,8 +188,7 @@ Ilya: Indeed, we should not be arbitrarily ignoring events in a real analysis --
 
 
 
-[\
-](https://files.slack.com/files-pri/TLLF6Q46S-F07E06KKDT7/ogc4_weights.png)
+[<br>](https://files.slack.com/files-pri/TLLF6Q46S-F07E06KKDT7/ogc4_weights.png)
 
 
 
@@ -270,8 +334,7 @@ Seems like the variable surrogate isnt doing so hot....
 
 
 
-\
-
+<br>
 
 
 
