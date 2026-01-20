@@ -21,7 +21,7 @@ The output of Jeff's code `python rateSampler.py -a −0.325 -s 0.213 -A 0.012 -
 np.sum(rate\_matrix)\~ 730\
 Ie rate of 730/year != expected rate of 578/year<br>
 
-![](<../.gitbook/assets/image (1).png>)
+![](<../.gitbook/assets/image (1) (1).png>)
 
 
 
@@ -60,7 +60,7 @@ Going back to some sanity checks (looking at events as delta functions — no po
 
 Now when i try to 'brute-force' compute the LnL at 5000 points sampled from a latim-hyper cube, we get:
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 **Maybe increasing the number of events? from 0.1 yr --> 3 yrs?**&#x20;
 
@@ -71,6 +71,50 @@ Now when i try to 'brute-force' compute the LnL at 5000 points sampled from a la
 Brute force + GP surrogate posterior... GP posteriors are biased.
 
 <div><figure><img src="../.gitbook/assets/lnl_surrogate_corner.png" alt="" width="375"><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/weighted_corner.png" alt="" width="375"><figcaption></figcaption></figure></div>
+
+
+
+Tweaking GP... and we get:
+
+
+
+_Diagnostics from bayesian optimisation_
+
+<figure><img src="../.gitbook/assets/diagnostics_round_9.png" alt=""><figcaption></figcaption></figure>
+
+
+
+_And the MCMC:_
+
+<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+
+
+
+
+
+
+
+
+* **Objective**: build a GP surrogate for f(λ) = -transform(LnL(λ)) over λ=(alpha, sigma, sfr\_a, sfr\_d) so BO can query informative points cheaply and MCMC can sample LnL(λ) via the surrogate (lnl\_surrogate.py (line 168)).
+* **Scaling / target transform (critical)**:
+  * AdaptiveRobustScaler anchors at the best observed LnL (reference\_value) and rescales by a robust near-peak spread (best \~5% of points), with scale capped (prevents “everything is flat”) (adaptive\_robust\_scalar.py (line 57)).
+  * Uses **asymmetric soft clipping**: only clips the low-LnL tail; high side remains linear so newly found better regions don’t saturate (adaptive\_robust\_scalar.py (line 155)).
+  * Auto lower-clip is bounded to reference\_value - 200 max delta, so tails can’t blow up the scaling (adaptive\_robust\_scalar.py (line 10)).
+* **GP model**:
+  * GPflow GPR with Matern52 kernel, ARD lengthscales initialised from parameter widths, constant mean; likelihood variance is fixed (prevents over-smoothing) (active\_learner.py (line 136)).
+  * Saved as a TF SavedModel for fast inference during sampling (active\_learner.py (line 404)).
+* **Bayesian Optimisation loop**:
+  * Trieste BayesianOptimizer with alternating acquisition rules:
+    * exploration: PredictiveVariance
+    * exploitation: ExpectedImprovement
+    * adaptive split based on recent improvement (active\_learner.py (line 257)).
+* **Sampling (MCMC)**:
+  * Bilby + emcee samples the surrogate likelihood (uniform priors on bounds). Surrogate returns LnL by predicting neg\_transformed then inverse-scaling (lnl\_surrogate.py (line 168)).
+  * Adds an **uncertainty penalty** by default: uses mu - beta\*sigma in the transformed space (implemented as neg\_mu + beta\*neg\_std) to suppress spurious high-LnL modes in uncertain regions (run\_sampler.py (line 42), lnl\_surrogate.py (line 177)).
+* **Why GP posterior can differ from brute-force “posterior”**:
+  * The brute-force plot is a _weighted random scan_ (temperature-softmax weights), not an actual posterior sampled with the true likelihood; it can look different even if both agree near the peak (simulation\_study.py (line 703)).
+  * The GP MCMC is a true sampler—but of the _surrogate_ likelihood; any residual surrogate bias (especially in tails/degeneracies) shifts the posterior. The uncertainty penalty makes it more conservative (often tighter/less multimodal) than a raw surrogate.
 
 
 
