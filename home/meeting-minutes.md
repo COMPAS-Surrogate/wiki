@@ -68,13 +68,9 @@ Now when i try to 'brute-force' compute the LnL at 5000 points sampled from a la
 
 <div><figure><img src="../.gitbook/assets/data_matrix_3.0yr.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/expected_matrix_3.0yr.png" alt=""><figcaption></figcaption></figure></div>
 
-Brute force:
+Brute force + GP surrogate posterior... GP posteriors are biased.
 
-<figure><img src="../.gitbook/assets/weighted_corner.png" alt=""><figcaption></figcaption></figure>
-
-And GP surrogate posterior
-
-<figure><img src="../.gitbook/assets/lnl_surrogate_corner.png" alt=""><figcaption></figcaption></figure>
+<div><figure><img src="../.gitbook/assets/lnl_surrogate_corner.png" alt="" width="375"><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/weighted_corner.png" alt="" width="375"><figcaption></figcaption></figure></div>
 
 
 
