@@ -21,7 +21,7 @@ The output of Jeff's code `python rateSampler.py -a −0.325 -s 0.213 -A 0.012 -
 np.sum(rate\_matrix)\~ 730\
 Ie rate of 730/year != expected rate of 578/year<br>
 
-![](../.gitbook/assets/image.png)
+![](<../.gitbook/assets/image (1).png>)
 
 
 
@@ -58,9 +58,23 @@ Going back to some sanity checks (looking at events as delta functions — no po
 
 <figure><img src="../.gitbook/assets/lnl_1d_scan.png" alt=""><figcaption></figcaption></figure>
 
+Now when i try to 'brute-force' compute the LnL at 5000 points sampled from a latim-hyper cube, we get:
+
+<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+**Maybe increasing the number of events? from 0.1 yr --> 3 yrs?**&#x20;
 
 
 
+<div><figure><img src="../.gitbook/assets/data_matrix_3.0yr.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/expected_matrix_3.0yr.png" alt=""><figcaption></figcaption></figure></div>
+
+Brute force:
+
+<figure><img src="../.gitbook/assets/weighted_corner.png" alt=""><figcaption></figcaption></figure>
+
+And GP surrogate posterior
+
+<figure><img src="../.gitbook/assets/lnl_surrogate_corner.png" alt=""><figcaption></figcaption></figure>
 
 
 
