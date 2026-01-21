@@ -4,7 +4,15 @@
 
 {% embed url="https://docs.google.com/presentation/d/1BFgpKmtBRcmBhMVngUpv3-ny_u8eQkaDcS-X76KdQh8/edit?usp=sharing" %}
 
-##
+**Meeting discussion points:**
+
+* Ilya expects 1D SFRa LnL to not peak at true but within +/- poission uncertainty&#x20;
+* For 1D LnL — what is rate of change?&#x20;
+* For 1D LnL — what is the correlation between SFRa and SFRd?&#x20;
+* Lets skip LVK section
+  * Discussion focuses on BO + tests
+
+
 
 ## Jan 20, 2026
 
