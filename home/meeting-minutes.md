@@ -1,5 +1,11 @@
 # ⏲️ Meeting Minutes
 
+## Jan 21, 2026
+
+{% embed url="https://docs.google.com/presentation/d/1BFgpKmtBRcmBhMVngUpv3-ny_u8eQkaDcS-X76KdQh8/edit?usp=sharing" %}
+
+##
+
 ## Jan 20, 2026
 
 ### **Goal:** reproduce same corners' as those in Jeff's paper (from the simulation study section).&#x20;
@@ -88,7 +94,23 @@ _And the MCMC:_
 
 <figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
+**What happens if we train a GP on the brute force points?**
 
+
+
+<figure><img src="../.gitbook/assets/lnl_surrogate_corner (1).png" alt=""><figcaption></figcaption></figure>
+
+**most brute-force random points are “terrible LnL” and essentially uninformative for the posterior**, but they still dominate GP hyperparameter fitting unless we downweight/throw them out.
+
+What’s going on:
+
+* The posterior is controlled by a relatively thin “tube” near the peak (say LnL >= max(LnL) - O(10–200)).
+* Uniform random sampling in 4D spends almost all its budget far from that tube.
+* A vanilla GP fit on those points tends to learn “everything is flat/boring” + long lengthscales, and then it can still hallucinate a wrong ridge when you run MCMC.
+
+We could improve by **throwing out low-LnL points...**
+
+***
 
 
 
