@@ -1,5 +1,93 @@
 # ⏲️ Meeting Minutes
 
+## August 19, 2026
+
+Catch up with Jeff.
+
+
+
+
+
+## Jan-Aug 2026
+
+**(Basically inactive — messages on slack)**
+
+**Ilya (May 10, 2026):** Have you had a chance to look into marginalising the likelihood over the finite COMPAS sample size as described above and including the corresponding uncertainty in the likelihood when building a surrogate model?  I haven't analytically derived whether this will solve the issue of systematic downward bias in the likelihood, but I hope it does...
+
+**Ilya (March 31, 2026):**
+
+It took longer than I hoped to get back to thinking about this, but I've now convinced myself that there's no way for a likelihood -- or even a probability distribution on the likelihood function -- to store the full information about the model evaluation.  I demonstrate this using a simple example below.  The upshot, though, is that there is no "smart" way to use multiple likelihood measurements to get a better estimate of the likelihood, even if one knows that the measurements are being taken at effectively the same parameters (like the way I could get a better estimate of the try length of my table by measuring it multiple times with different rulers).  That means an interpolated likelihood estimate -- one given by a surrogate model -- can only be at most as accurate as the directly evaluated likelihoods that go into building it.  That accuracy, of course, can be estimated with bootstrapping, which tells us how many model evaluations we need at a given point in parameter space...\
+\
+One practical thing is whether we should try to account for the finite model size when evaluating the local likelihood.  I think the answer is yes.  See my example above, where I suggested that the likelihood should be computed as follows:<br>
+
+```
+We are going to draw a sample of S people from our forward model. Then compute how many Avi's we expect, k_S, by literally taking each of S people and picking them to be Avi with a probability of lambda and not Avi with a probability 1-lambda. (In practice, to speed things up, we do this with a Poisson sampler, with parameter S*lambda). We then convert the predicted number of Avi's from S samples, k_S, into a predicted number of Avi's from a million samples,
+k_M = k_S * 10^6/S.
+And finally compute our Monte Carlo estimate for the likelihood of our observed data (1 Avi in a million samples) as
+\hat{L} = exp(-k_M) k_M^1 / 1! = exp(-k_M) k_M.
+```
+
+We only know that, having asked S people, we got k\_S Avi's.  That doesn't mean the true fraction of Avi's is k\_S/S, or that we expect k\_M Avi's per million.  Rather, the probability that k\_M is the right number of Avi's per million is given by\
+p(k\_M | k\_S out of S) = p(k\_S out of S | k\_M) p(k\_M) / p(k\_S out of S),\
+where p(k\_S out of S | k\_M) = exp(-k\_M\*S/10^6) (k\_M S /10^6)^k\_S / k\_S! and p(k\_M) is a prior.\
+Then, the actual likelihood estimate is\
+\hat{L} = \int d k\_M exp(-k\_M) k\_M  p(k\_M | k\_S out of S) .\
+\
+Whether this marginalisation over model uncertainty makes a difference or not depends on the size of the model, but it's probably best to include it...\
+\
+I think that was the one item that bugged me, now happy to move forward. \
+P.S. Demonstration of why there's no way for a likelihood to store the full information about the model evaluation.  Consider an urn containing blue and red balls.  We want to know the likelihood for the data set consisting of 10 random draws to contain 5 red and 5 blue balls.  Each of our model evaluations will only include 1 drawn ball, from which we'll evaluate the likelihood.  We can then "average" these however we want -- but using only likelihoods, not underlying information about the colour of the balls drawn.  However, by trivial symmetry, the likelihood is going to be the same for a model in which we've drawn a red ball or a blue one.  So the average would have to be the same whether we have a million models out of which half had a red ball and half had a blue ball, or a million models in each of which a red ball was drawn...
+
+
+
+**Ilya (Jan 29, 2026):**
+
+It occurred to me that we have some more thinking to do about how to make our likelihood unbiased.\
+\
+Consider the following simple problem.   We have observed a sample of 1 million people from around the globe and find only one is named Avi.  We have a forward model that allows us to predict the number of Avi's in the population and want to compute the likelihood of that model.  Our model has a single parameter, rate of Avi's per individual, lambda.  The expected number of Avi's among a million people is lambda\*10^6.  The likelihood of observing 1 Avi in a sample of a million is then given by the Poisson probability distribution\
+L = exp(-lambda\*10^6) (lambda\*10^6)^1 / 1! =  exp(-lambda\*10^6) (lambda\*10^6).\
+For example, for lambda=10^{-6}, the likelihood should be exp(-1).\
+\
+However, let's suppose we aren't quite smart enough to compute that, for a given lambda, the expected number of Avi's among a million people is lambda\*10^6.  Instead, we choose to do so with a Monte Carlo calculation.  We are going to draw a sample of S people from our forward model.  Then compute how many Avi's we expect, k\_S, by literally taking each of S people and picking them to be Avi with a probability of lambda and not Avi with a probability 1-lambda.  (In practice, to speed things up, we do this with a Poisson sampler, with parameter S\*lambda).  We then convert the predicted number of Avi's from S samples, k\_S, into a predicted number of Avi's from a million samples,\
+k\_M = k\_S \* 10^6/S.\
+And finally compute our Monte Carlo estimate for the likelihood of our observed data (1 Avi in a million samples) as\
+\hat{L} = exp(-k\_M) k\_M^1 / 1! = exp(-k\_M) k\_M.\
+For example, for S=10^9 and lambda=10^{-6}, I happened to draw k\_S = 1038 samples, so the expected number per million is 1.038 and the Monte Carlo estimate for the likelihood is \hat{L}exp(-1.038)\*1.038.  In this particular case, the fractional error relative to the correct likelihood of exp(-1) is less than a part in a thousand.\
+\
+But it seems that I should be able to use the power of interpolation, too.  What if I distribute my N=10^9 allowed model evaluations into R runs, each of size S=N/R?  E.g., R=1 corresponds to the example above; R=1000000 would be a million runs of a thousand samples each; etc.  In this case, the interpolation is trivial, because I am going to do all of my runs for the same lambda of 10^{-6}.  Clearly, if I were to combine all of my runs together, for any R, I have the same total number of samples and should have the same accuracy of evaluating the likelihood.  But I don't do that; instead, for each run, I evaluate the likelihood, and then average the likelihoods -- because that's how our likelihood interpolation idea would work.\
+\
+Well, I've done this test for lambda=10^{-6}, N=10^9, R going from 1 to a million, and the 'data' that Avi is one in a million. And the results don't look good.  Large R lead to a systematic and increasingly bad under-estimate of the likelihood.  I understand why, I just haven't figured out what to do about it yet.  But since I am going offline shortly, I'm sending this to you now so you can have fun thinking about it while I am hiking in Tasmania.&#x20;
+
+<figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+
+
+
+**Avi (Jan 27, 2026):**
+
+> &#x20;Is that for a single COMPAS run?
+
+Each x-axis point marks a different COMPAS run (5M binaries, 32M binaries, 512M binaries ), using the same settings (I think -- these are Jeff's runs for this study).\
+\
+I think your ideas of N/R is really interesting! I wonder if one can factor in a minimum BBH rate needed in this exploration.\
+\
+Id imagine that in some regions of parameter space a small N might be because the rate is very low, and so we'd need to teach the GP to exclude that region.
+
+**Ilya (Jan 24, 2026):** Is that for a single COMPAS run?  I think the question is, if I can generate a fixed N binaries in total, what is the best way to split them across R runs, where I can vary R?  Am I better off having a large R (broad exploration of the parameter space) with few binaries (N/R) in each run?  I would think so, because interpolation essentially allows us to combine many nearby runs.  But is there a minimum threshold for N/R that we should not drop below (e.g., if we get zero BBHs from a run because the sample size is too small, is that run no longer useful)?
+
+
+
+**Avi (Jan 21, 2026):** this is kindof the plot that we want to explore in the future -- X axis shows the size (N) of the COMPAS run, the uncertainty is higher for lower N -- but maybe its ok in some cases
+
+<figure><img src="../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+
+
+
+
+##
+
 ## Jan 21, 2026
 
 {% embed url="https://docs.google.com/presentation/d/1BFgpKmtBRcmBhMVngUpv3-ny_u8eQkaDcS-X76KdQh8/edit?usp=sharing" %}
