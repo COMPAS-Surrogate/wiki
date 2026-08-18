@@ -4,8 +4,105 @@
 
 Catch up with Jeff.
 
+### Finite COMPAS sample size — answering Ilya's May 10 question
 
+**Question (Ilya, May 10):** does marginalising the likelihood over the finite COMPAS sample size remove the systematic downward bias?
 
+**Answer: no.** It stops the bias from becoming catastrophic, but it does not remove it. The only real fix is a bigger COMPAS run relative to the number of observed events.
+
+#### The problem, in plain terms
+
+* COMPAS does not tell us the BBH merger rate exactly. It evolves a finite number of binaries and counts which ones merge and are detectable. That count is noisy.
+* We feed that noisy count into the likelihood. The likelihood is a **curved** function of the count, so the noise does **not** average out.
+* The error always goes the same way: **we under-estimate the likelihood, never over-estimate it.**
+* Worst case: if a COMPAS run predicts zero detections, the likelihood is exactly zero. Averaging lots of zeros destroys the answer. This is what Ilya's January plot was showing.
+
+#### Everything depends on one number
+
+> **t = (effective COMPAS detections) / (observed detections)**
+
+| t   | bias in lnL | verdict            |
+| --- | ----------- | ------------------ |
+| 0.1 | −9.1        | broken             |
+| 1   | −0.63       | bad                |
+| 10  | −0.05       | OK                 |
+| 100 | −0.005      | fine               |
+
+Since posterior widths are set by ΔlnL ≈ 0.5, we want **t ≳ 10**.
+
+<figure><img src="../.gitbook/assets/fsb_bias_vs_t.png" alt=""><figcaption>Likelihood bias vs t. Dotted lines mark where our COMPAS runs sit for a 1 yr (~750 event) mock.</figcaption></figure>
+
+#### What Ilya's marginalisation actually buys
+
+* It **can never return exactly zero**, so it rescues the catastrophic case: at t = 0.01 it turns a −99 lnL error into −2.
+* But once runs are big enough (t > 1) it is **slightly worse** than what we do now: bias → −1/t instead of −1/(2t).
+* The choice of prior barely matters (scanned p(k) ∝ k^(a−1), a = 0 … 2; all agree to 3 decimals for t ≳ 1).
+* It is a seatbelt, not an engine. Consistent with Ilya's own March 31 conclusion that no way of combining likelihoods recovers information the simulation never had.
+
+#### The surprise: our runs are far smaller than they look
+
+The cosmic integration weights each binary by how much star formation happened at its metallicity and redshift. Those weights are wildly uneven, so the *effective* number of binaries is much smaller than the raw count.
+
+| run | raw merging BBHs | **effective** | efficiency |
+| --- | ---------------- | ------------- | ---------- |
+| 5M  | 13,019           | 200           | **1.54%**  |
+| 32M | 83,145           | 1,266         | **1.52%**  |
+
+* **0.45% of merging BBHs carry 50% of the total detection rate** — identical in both runs.
+* The ~1.5% efficiency is the **same in both runs**, so it is structural. More binaries will not improve it.
+* Effective count scales **linearly** with run size (6.31× vs 6.39× raw), so it is purely a question of how big a run we pay for.
+* Per McZ grid bin the median effective count is **1.9 (5M)** and **8.4 (32M)** — each pixel of the model grid rests on a handful of binaries.
+
+<figure><img src="../.gitbook/assets/fsb_weight_concentration.png" alt=""><figcaption>Left: a tiny fraction of binaries carries the whole rate. Right: effective binaries backing each McZ grid bin.</figcaption></figure>
+
+#### Which analyses are safe
+
+| data                  | 5M     | 32M        |
+| --------------------- | ------ | ---------- |
+| LVK O3, ~50 events    | −0.112 | **−0.019** ✅ |
+| mock 1 yr, ~750       | −0.779 | −0.233     |
+| mock 3 yr, ~2250      | −1.252 | −0.511 ❌   |
+
+* **The LVK analysis is fine with the 32M run.** This is the important one for the paper.
+* The 3 yr simulation study is **not** fine even with 32M.
+* Run size needed for |bias| < 0.05: ~12M binaries for 50 events, ~180M for 750, ~541M for 2250. **Jeff's 512M run would cover the 1 yr case comfortably.**
+
+<figure><img src="../.gitbook/assets/fsb_which_analysis_safe.png" alt=""><figcaption>Bias vs number of observed events, for each COMPAS run size.</figcaption></figure>
+
+#### Does this explain the sfr\_a–sfr\_d ridge? Probably not
+
+A bias that is the same everywhere cancels out when we normalise the posterior. It only hurts if it **changes with the parameters**. Measured tilt across each prior range (32M, 750 events):
+
+| direction | tilt (lnL) |
+| --------- | ---------- |
+| alpha     | 0.70       |
+| sigma     | 0.54       |
+| sfr\_d    | 0.05       |
+| sfr\_a    | **0.000**  |
+
+* The tilt sits in **alpha and sigma** (the metallicity parameters), which makes sense — they control which binaries get the big weights.
+* It is **exactly zero in sfr\_a**, because sfr\_a is a pure amplitude: it multiplies every weight equally, so it cannot change the effective sample size. (Good sanity check that the calculation is behaving.)
+* So this effect **cannot** be what bends the sfr\_a–sfr\_d banana. That needs a different explanation — most likely the per-bin noise (only ~2–8 effective binaries per pixel) or the GP target scaling.
+
+#### A design trade-off we had not noticed
+
+Going from a 1 yr to a 3 yr mock (to get more events and a sharper peak) has a hidden cost:
+
+* more events → sharper likelihood peak → **narrower posterior** ✅
+* more events → smaller t → **more biased likelihood** ❌
+
+We tripled the event count without adding a single binary, so t dropped from 0.80 to 0.27 and the bias roughly doubled. **There is an optimum observing duration we have not located.** This is exactly Ilya's January "how to split N binaries across R runs" question, and it belongs in the paper's Discussion.
+
+#### Running / still open
+
+* **Running now:** simulation study on 32M at 3 yr / 1 yr / 0.1 yr, to see whether the ridge softens as t improves. If it does, finite-sample bias contributes; if not, it is the GP/scaler.
+* **Not yet quantified:** the per-bin McZ grid term. My numbers cover the Poisson count term only. The grid term is likely the bigger error budget (34–72% noise per pixel) and needs a bootstrap over COMPAS systems.
+
+#### Bug found
+
+`workflow.py` saved the scaler **after** the BO loop finished, but the per-round diagnostics load it **during** the loop — so the default `--postprocess-during-bo` always crashed on round 0. Fixed by saving the scaler before `learner.run()`.
+
+Code: `docs/studies/finite_sample_bias/` (`finite_sample_bias.py`, `effective_sample_size.py`, `neff_vs_params.py`, `duration_scan.py`, `make_wiki_plots.py`).
 
 
 ## Jan-Aug 2026
