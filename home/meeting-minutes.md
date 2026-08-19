@@ -184,6 +184,133 @@ An autocorrelation time of \~16k steps is a strongly degenerate posterior. **Nex
 * **Not yet quantified:** the per-bin McZ grid term. All numbers above cover the Poisson count term only. The grid term is likely the bigger error budget (\~34% noise per pixel at 32M) and needs a bootstrap over COMPAS systems.
 * 0.1 yr leg of the duration scan still running.
 
+### 🔴 The surrogate itself was invalid — acquisition, not sample size
+
+Follow-up (`docs/studies/subset_training/`) on a 4D toy tuned to COMPAS scale: real parameter box, lnL spanning ~5×10⁴, ~1–2% informative points (matching the observed 3 yr run). Ground truth known, so everything below is scored against it.
+
+#### The surrogate was badly wrong — and we can detect it WITHOUT truth
+
+At 1.6% informative points the fitted GP is not merely imprecise:
+
+| diagnostic | result |
+| --- | --- |
+| leave-one-out calibration | z = −65, 8.8, −45, 4.5, −22, −17 → **0/6 within \|z\|≤2** |
+| bootstrap implied corr | −0.94 … **+1.65**, std **1.03** (>1 ⇒ GP mean not even locally convex) |
+| posterior-predictive re-evaluation | mean z = **−638** (off by ~1700σ at its own posterior draws) |
+| recovered corr(sfr\_a, sfr\_d) | **−0.98** vs true **+0.85** — *sign flipped* |
+
+The first three need no ground truth → they belong in the pipeline as validity gates.
+
+#### Subsetting the training set does NOT help
+
+| harsh (1.6% informative) | n\_train | width ratio | corr | bias |
+| --- | --- | --- | --- | --- |
+| keep all | 2000 | 1.47 | 0.128 | 0.45 |
+| top-N only | 32 | **5.07** | 0.004 | 0.26 |
+| thinned | 230 | 2.47 | 0.057 | 0.31 |
+
+Dropping far-tail points makes it **worse** — they anchor the GP low, and without them σ explodes where there is no data. At 24% informative every strategy is fine. **The problem is not which points we keep; it is that too few are informative.**
+
+#### Root cause: BO was doing worse than random
+
+| target transform | informative acquired | best lnL found |
+| --- | --- | --- |
+| hard clip | 4/210 (1.9%) | −3046 |
+| _random baseline_ | _5/210 (2.4%)_ | _−793_ |
+| log | 23/210 (11%) | −129 |
+| sqrt | 36/210 (17%) | −36 |
+| linear | 37/210 (18%) | −20 |
+
+**A tight clip flattens the far tail — the only gradient telling acquisition which way the peak is.** BO was blind, never accumulated points where the posterior lives, so the surrogate was fitted by extrapolation.
+
+#### Acquisition and sampling want OPPOSITE transforms
+
+* BO needs tail gradient → don't clip.
+* Sampling needs peak resolution → uncompressed, the posterior is ~10⁻⁴ of the GP range and comes out **10× too narrow**.
+
+Full loop (BO → GP → NUTS), scored against truth:
+
+| target | informative | conv | width ratio | corr | \|bias\|/σ |
+| --- | --- | --- | --- | --- | --- |
+| none | 26/210 | False | 2.79 | 0.958 | 0.65 |
+| **sqrt** | **35/210** | False | **1.93** | **0.822** | 1.33 |
+| log | 24/210 | True | **0.03** | 0.015 | 8.50 |
+| clip | 33/210 | False | 3.39 | 0.993 | 7.09 |
+
+`log` fails badly: its inverse is `expm1`, which **amplifies GP error exponentially** → posterior 33× too narrow. `sqrt` wins because its inverse is only quadratic. Note `log` is the only variant that "converged" — **sampler convergence is not evidence of surrogate validity.**
+
+#### Changes made
+
+* `AdaptiveRobustScaler` gained a `compression` option (`none`/`sqrt`/`log`) applied to the drop below the best lnL. Exact round-trip; JAX inverse matches numpy.
+* Production default is now **`compression="sqrt"`, no soft clipping, loose hard clip** (`min_delta` 1e3, `max_delta` 1e5, `max_scale` 1e9).
+* ⚠️ This **reverses** the earlier tight-clip fix (`min_delta=20/max_delta=50`): that helped the sampling surrogate but blinded acquisition, which is the dominant problem.
+
+#### Still open
+
+* Best achieved (`sqrt`): corr 0.822 (truth 0.85), width **1.93× too wide**, bias 1.3σ. Conservative and roughly right, but not correct yet — and single-seed.
+* None of the good variants pass the convergence gate; unclear whether the gate is too strict or the surrogate genuinely isn't converged.
+* All of the above is the toy — needs re-running on real COMPAS data.
+
+### Acquisition schedule, refit cadence, and why the toy runs slow
+
+#### The BO loop was spending 2/3 of its budget avoiding the peak
+
+`JaxActiveLearner.run` used a hard **sequential** split: the first `exploration_fraction` (default **2/3**) of steps on `predictive_variance`, the remaining 1/3 on expected improvement. `predictive_variance` maximises posterior variance, i.e. it deliberately samples *away* from existing data — including away from the peak. So in a 150-step run, 100 steps were spent not looking for the posterior.
+
+(The old trieste code alternated acquisitions with an adaptive split; the JAX rewrite dropped that.)
+
+Now **cycled**: `exploration_fraction=1/3`, `cycle_length=30` — 10 explore then 20 exploit, repeating. `cycle_length=None` recovers the old single-block behaviour.
+
+150 BO steps on the COMPAS-scale toy, sqrt target:
+
+| schedule | informative | best lnL | time |
+| --- | --- | --- | --- |
+| old: 2/3 explore block | 42/210 | −36.1 | 392 s |
+| 1/3 explore block | 62/210 | −26.9 | 541 s |
+| **NEW: 1/3 explore, cycle 30** | **60/210** | **−20.8** | **344 s** |
+| 1/3 explore, cycle 15 | 58/210 | −30.1 | 253 s |
+| pure exploit (EI only) | 62/210 | **−6.6** | 750 s |
+| _random_ | _5/210_ | _−792.9_ | |
+
+The cycled schedule beats the old one on every axis (+43% informative, better peak, faster). **But pure exploitation beats everything** on these two metrics. ⚠️ Caveat: both metrics are *peak-focused* (best lnL, and "informative" = within KEEP_DELTA of the best). A good posterior needs coverage of the whole high-likelihood region, not just the mode — so this does **not** yet show EI-only gives the better posterior. Needs a posterior-scored rerun before concluding.
+
+#### Why the toy is slow: JAX recompilation, not the likelihood
+
+| | cost |
+| --- | --- |
+| toy `true_lnl` | **1.4 µs** (715k/s) |
+| GP hyperparameter refit | 0.33 s |
+| `predict_f`, same training shape | 14.5 ms |
+| `predict_f`, training set grew by 1 row | **995 ms** ← 68× |
+
+The training array grows by one row every BO step, so **JAX re-traces and recompiles the whole GP predict path every step**. That, not the GP maths and certainly not the likelihood, is the bottleneck.
+
+Added `refit_every` (default **15**) to skip hyperparameter re-optimisation between steps — accuracy is unaffected (identical best lnL at 1/15/30) but it only buys ~1.3×, because it does not avoid the recompile. **The real fix is batch acquisition** (q points per iteration → q× fewer recompiles), or padding the training arrays to a fixed capacity.
+
+⚠️ This applies to production too: the real duration scan ran at **7.11 s/step with a 0.88 s likelihood** — ~6 of every 7 seconds was surrogate overhead, not COMPAS. Active learning only pays when the likelihood is expensive *relative to the GP refit*; at 32M it is not.
+
+#### More budget does NOT fix the posterior
+
+sqrt target, scored against truth:
+
+| BO steps | informative | best lnL | width ratio | corr | \|bias\|/σ |
+| --- | --- | --- | --- | --- | --- |
+| 150 | 35/210 | −36.1 | 1.93 | 0.822 | 1.33 |
+| 350 | 64/410 | −5.8 | 2.50 | 0.947 | 1.69 |
+| 700 | 102/760 | −13.2 | **2.54** | 0.963 | 1.12 |
+
+The width **plateaus at ~2.5× too wide** — a systematic floor, not noise. Likely cause: sqrt inverts as `lnL = ref − (t·scale)²`, whose derivative is **0 at the peak**, so the transform flattens the likelihood exactly where the posterior lives.
+
+#### `softlog` — a fix that did NOT work
+
+Added `compression="softlog"`, `f(d) = d0·log1p(d/d0)`: linear near the peak (derivative 1, no distortion) and logarithmic far away (1000× compression). Verified analytically: inverse derivative 1.05 at Δ=0.5, 1.2 at Δ=2.
+
+Empirically **worse than sqrt** at `d0=10`: 25/210 informative, best lnL −1037, width 0.29, corr 0.040, bias 3.7σ. Compressing hard beyond Δ=10 starves acquisition of far-tail gradient — the same failure as clipping. Needs `d0` tuning (try 10²–10³) or it is simply the wrong idea. **`sqrt` remains the best target so far.**
+
+#### State of the surrogate
+
+Best available config: `compression="sqrt"`, `exploration_fraction=1/3`, `cycle_length=30`, `refit_every=15`. That yields a posterior roughly right in shape (corr 0.82–0.96 vs 0.85) but **~2–2.5× too wide** and 1–1.7σ biased, and it does not improve with budget. Conservative rather than overconfident, but not yet correct. All single-seed, all on the toy.
+
 ## Jan-Aug 2026
 
 **(Basically inactive — messages on slack)**
