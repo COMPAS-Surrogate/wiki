@@ -65,10 +65,15 @@ Since posterior widths are set by ΔlnL ≈ 0.5, we want **N\_eff ≳ 10 × N\_o
 * The cosmic integration **weights each binary** by how much star formation happened at its metallicity and redshift.&#x20;
 * Those weights are wildly uneven, so the _effective_ number of binaries is much smaller than the raw count.
 
-| run | raw merging BBHs | **effective** | efficiency |
-| --- | ---------------- | ------------- | ---------- |
-| 5M  | 13,019           | 163           | **1.25%**  |
-| 32M | 83,145           | 1,018         | **1.22%**  |
+| run   | raw merging BBHs | **effective** | efficiency | eval cost |
+| ----- | ---------------- | ------------- | ---------- | --------- |
+| 5M    | 13,019           | 163           | **1.25%**  | 0.28 s    |
+| 32M   | 83,145           | 1,018         | **1.22%**  | 0.88 s    |
+| 512M  | 1,326,573        | 16,257        | **1.23%**  | **80 s**  |
+
+> ✅ The 512M run (measured 2026-08-19) confirms both predictions: efficiency is constant at ~1.2% across a **100× range** of run sizes, and N\_eff scales linearly — extrapolation predicted 16,288, measured 16,257 (**0.2% off**).
+>
+> ⚠️ But a likelihood evaluation on 512M costs **90× more** than on 32M (for only 16× the binaries — the 22 GB file thrashes memory). A 250-point surrogate takes ~5.5 h; a 100-injection PP study would take ~550 h. **512M is not usable for routine surrogate training.**
 
 > ⚠️ N\_eff must be computed over **systems**, not over (system × redshift) cells. Redshift is a deterministic integration grid, so its cells are perfectly correlated within a binary and are not independent samples. Counting them inflates N\_eff by ~24%.
 
@@ -110,12 +115,18 @@ Single-run lnL bias, i.e. quantity **(b)**:
 
 A bias that is the same everywhere cancels out when we normalise the posterior. It only hurts if it **changes with the parameters**. "Tilt" here means `max(bias) − min(bias)` across the prior range in one direction, holding the other three at truth (N\_obs = 750):
 
-| direction | tilt, 5M  | tilt, 32M |
-| --------- | --------- | --------- |
-| alpha     | **4.64**  | 0.70      |
-| sigma     | **2.20**  | 0.36      |
-| sfr\_d    | 0.09      | 0.02      |
-| sfr\_a    | **0.000** | **0.000** |
+| direction | tilt, 5M  | tilt, 32M | tilt, 512M |
+| --------- | --------- | --------- | ---------- |
+| alpha     | **4.64**  | 0.70      | **0.042**  |
+| sigma     | **2.20**  | 0.36      | **0.023**  |
+| sfr\_d    | 0.09      | 0.02      | ~0.001     |
+| sfr\_a    | **0.000** | **0.000** | **0.000**  |
+
+> 🔑 **Criterion correction.** The *absolute* bias cancels when the posterior is normalised (and is absorbed by the surrogate's target scaling). Only the **tilt** distorts the posterior. The earlier `N_eff ≳ 10 N_obs` rule was derived from the absolute bias and is too strict — the correct criterion is
+>
+> **N\_eff ≳ 2 N\_obs**  (i.e. tilt < 0.5)
+>
+> This matches what we actually observed: 1 yr on 32M has an absolute bias of −0.37 (7× over the old rule) yet recovered σ *exactly*, because its tilt is only 0.70.
 
 * The tilt sits in **alpha and sigma** (the metallicity parameters), which makes sense — they control which binaries get the big weights.
 * It is **exactly zero in sfr\_a**. Since the bias depends only on N\_eff, and sfr\_a is a pure amplitude that multiplies every weight equally, it *cannot* change N\_eff. The zero is exact by construction, not numerical luck.
