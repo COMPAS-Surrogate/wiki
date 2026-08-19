@@ -10,7 +10,7 @@ Catch up with Jeff.
 
 **Answer: no.** It stops the bias from becoming catastrophic, but it does not remove it. The only real fix is a bigger COMPAS run relative to the number of observed events.
 
-#### The problem, in plain terms
+#### The problem:
 
 * COMPAS does not tell us the BBH merger rate exactly. It evolves a finite number of binaries and counts which ones merge and are detectable. That count is noisy.
 * We feed that noisy count into the likelihood. The likelihood is a **curved** function of the count, so the noise does **not** average out.
@@ -30,7 +30,7 @@ Jensen's inequality means (a) ≠ (b), and for this estimator they differ a lot.
 
 #### (a) Ilya's question: averaging over runs
 
-> **t = (effective COMPAS detections) / (observed detections)**
+> **t = (effective COMPAS detections) / (observed detections in mock/LVK catalog)**
 
 | t   | bias in lnL | verdict |
 | --- | ----------- | ------- |
@@ -53,16 +53,17 @@ The algebra collapses to something much simpler:
 
 Since posterior widths are set by ΔlnL ≈ 0.5, we want **N\_eff ≳ 10 × N\_obs**.
 
-#### What Ilya's marginalisation actually buys
+#### What Ilya's marginalisation gives us:
 
 * It **can never return exactly zero**, so it rescues the catastrophic case: at t = 0.01 it turns a −99 lnL error into −2.
 * But once runs are big enough (t > 1) it is **slightly worse** than what we do now: bias → −1/t instead of −1/(2t).
 * The choice of prior barely matters (scanned p(k) ∝ k^(a−1), a = 0 … 2; all agree to 3 decimals for t ≳ 1).
-* It is a seatbelt, not an engine. Consistent with Ilya's own March 31 conclusion that no way of combining likelihoods recovers information the simulation never had.
+* its a band-aid, consistent with Ilya's own March 31 conclusion that no way of combining likelihoods recovers information the simulation never had...
 
-#### The surprise: our runs are far smaller than they look
+#### HOWEVER: our runs are far smaller than they look!&#x20;
 
-The cosmic integration weights each binary by how much star formation happened at its metallicity and redshift. Those weights are wildly uneven, so the *effective* number of binaries is much smaller than the raw count.
+* The cosmic integration **weights each binary** by how much star formation happened at its metallicity and redshift.&#x20;
+* Those weights are wildly uneven, so the _effective_ number of binaries is much smaller than the raw count.
 
 | run | raw merging BBHs | **effective** | efficiency |
 | --- | ---------------- | ------------- | ---------- |
@@ -103,9 +104,9 @@ Single-run lnL bias, i.e. quantity **(b)**:
 * The 3 yr simulation study is **not** fine, even with 32M — and even the 512M run is only marginal for it. **Better to shorten the mock than to chase a bigger run.**
 * Run size needed for |bias| < 0.05: **~16M** binaries for 50 events, **~236M** for 750, **~707M** for 2250. Jeff's 512M run covers the 1 yr case comfortably.
 
-<figure><img src="../.gitbook/assets/fsb_which_analysis_safe.png" alt=""><figcaption>Bias vs number of observed events, for each COMPAS run size.</figcaption></figure>
+#### Problem 2: Does this explain the sfr\_a–sfr\_d ridge? Probably not
 
-#### Does this explain the sfr\_a–sfr\_d ridge? Probably not
+<figure><img src="../.gitbook/assets/Screenshot 2026-08-19 at 10.31.21 am.png" alt=""><figcaption></figcaption></figure>
 
 A bias that is the same everywhere cancels out when we normalise the posterior. It only hurts if it **changes with the parameters**. "Tilt" here means `max(bias) − min(bias)` across the prior range in one direction, holding the other three at truth (N\_obs = 750):
 
@@ -121,7 +122,7 @@ A bias that is the same everywhere cancels out when we normalise the posterior. 
 * So this effect **cannot** be what bends the sfr\_a–sfr\_d banana. That needs a different explanation — most likely the per-bin noise (only ~2–8 effective binaries per pixel) or the GP target scaling.
 * **But note the 5M numbers.** A 4.6 lnL differential tilt along alpha is ~10× the ΔlnL that sets 1σ. Any earlier result built on the 5M run has a badly distorted alpha/sigma likelihood surface.
 
-#### A design trade-off we had not noticed
+#### Another trade off
 
 Going from a 1 yr to a 3 yr mock (to get more events and a sharper peak) has a hidden cost:
 
@@ -164,24 +165,17 @@ An autocorrelation time of ~16k steps is a strongly degenerate posterior. **Next
 * **Not yet quantified:** the per-bin McZ grid term. All numbers above cover the Poisson count term only. The grid term is likely the bigger error budget (~34% noise per pixel at 32M) and needs a bootstrap over COMPAS systems.
 * 0.1 yr leg of the duration scan still running.
 
-#### Bug found
-
-`workflow.py` saved the scaler **after** the BO loop finished, but the per-round diagnostics load it **during** the loop — so the default `--postprocess-during-bo` always crashed on round 0. Fixed by saving the scaler before `learner.run()`.
-
-Code: `docs/studies/finite_sample_bias/` (`finite_sample_bias.py`, `effective_sample_size.py`, `neff_vs_params.py`, `duration_scan.py`, `make_wiki_plots.py`).
-
-
 ## Jan-Aug 2026
 
 **(Basically inactive — messages on slack)**
 
-**Ilya (May 10, 2026):** Have you had a chance to look into marginalising the likelihood over the finite COMPAS sample size as described above and including the corresponding uncertainty in the likelihood when building a surrogate model?  I haven't analytically derived whether this will solve the issue of systematic downward bias in the likelihood, but I hope it does...
+**Ilya (May 10, 2026):** Have you had a chance to look into marginalising the likelihood over the finite COMPAS sample size as described above and including the corresponding uncertainty in the likelihood when building a surrogate model? I haven't analytically derived whether this will solve the issue of systematic downward bias in the likelihood, but I hope it does...
 
 **Ilya (March 31, 2026):**
 
-It took longer than I hoped to get back to thinking about this, but I've now convinced myself that there's no way for a likelihood -- or even a probability distribution on the likelihood function -- to store the full information about the model evaluation.  I demonstrate this using a simple example below.  The upshot, though, is that there is no "smart" way to use multiple likelihood measurements to get a better estimate of the likelihood, even if one knows that the measurements are being taken at effectively the same parameters (like the way I could get a better estimate of the try length of my table by measuring it multiple times with different rulers).  That means an interpolated likelihood estimate -- one given by a surrogate model -- can only be at most as accurate as the directly evaluated likelihoods that go into building it.  That accuracy, of course, can be estimated with bootstrapping, which tells us how many model evaluations we need at a given point in parameter space...\
+It took longer than I hoped to get back to thinking about this, but I've now convinced myself that there's no way for a likelihood -- or even a probability distribution on the likelihood function -- to store the full information about the model evaluation. I demonstrate this using a simple example below. The upshot, though, is that there is no "smart" way to use multiple likelihood measurements to get a better estimate of the likelihood, even if one knows that the measurements are being taken at effectively the same parameters (like the way I could get a better estimate of the try length of my table by measuring it multiple times with different rulers). That means an interpolated likelihood estimate -- one given by a surrogate model -- can only be at most as accurate as the directly evaluated likelihoods that go into building it. That accuracy, of course, can be estimated with bootstrapping, which tells us how many model evaluations we need at a given point in parameter space...\
 \
-One practical thing is whether we should try to account for the finite model size when evaluating the local likelihood.  I think the answer is yes.  See my example above, where I suggested that the likelihood should be computed as follows:<br>
+One practical thing is whether we should try to account for the finite model size when evaluating the local likelihood. I think the answer is yes. See my example above, where I suggested that the likelihood should be computed as follows:<br>
 
 ```
 We are going to draw a sample of S people from our forward model. Then compute how many Avi's we expect, k_S, by literally taking each of S people and picking them to be Avi with a probability of lambda and not Avi with a probability 1-lambda. (In practice, to speed things up, we do this with a Poisson sampler, with parameter S*lambda). We then convert the predicted number of Avi's from S samples, k_S, into a predicted number of Avi's from a million samples,
@@ -190,44 +184,40 @@ And finally compute our Monte Carlo estimate for the likelihood of our observed 
 \hat{L} = exp(-k_M) k_M^1 / 1! = exp(-k_M) k_M.
 ```
 
-We only know that, having asked S people, we got k\_S Avi's.  That doesn't mean the true fraction of Avi's is k\_S/S, or that we expect k\_M Avi's per million.  Rather, the probability that k\_M is the right number of Avi's per million is given by\
+We only know that, having asked S people, we got k\_S Avi's. That doesn't mean the true fraction of Avi's is k\_S/S, or that we expect k\_M Avi's per million. Rather, the probability that k\_M is the right number of Avi's per million is given by\
 p(k\_M | k\_S out of S) = p(k\_S out of S | k\_M) p(k\_M) / p(k\_S out of S),\
 where p(k\_S out of S | k\_M) = exp(-k\_M\*S/10^6) (k\_M S /10^6)^k\_S / k\_S! and p(k\_M) is a prior.\
 Then, the actual likelihood estimate is\
-\hat{L} = \int d k\_M exp(-k\_M) k\_M  p(k\_M | k\_S out of S) .\
+\hat{L} = \int d k\_M exp(-k\_M) k\_M p(k\_M | k\_S out of S) .\
 \
 Whether this marginalisation over model uncertainty makes a difference or not depends on the size of the model, but it's probably best to include it...\
 \
-I think that was the one item that bugged me, now happy to move forward. \
-P.S. Demonstration of why there's no way for a likelihood to store the full information about the model evaluation.  Consider an urn containing blue and red balls.  We want to know the likelihood for the data set consisting of 10 random draws to contain 5 red and 5 blue balls.  Each of our model evaluations will only include 1 drawn ball, from which we'll evaluate the likelihood.  We can then "average" these however we want -- but using only likelihoods, not underlying information about the colour of the balls drawn.  However, by trivial symmetry, the likelihood is going to be the same for a model in which we've drawn a red ball or a blue one.  So the average would have to be the same whether we have a million models out of which half had a red ball and half had a blue ball, or a million models in each of which a red ball was drawn...
-
-
+I think that was the one item that bugged me, now happy to move forward.\
+P.S. Demonstration of why there's no way for a likelihood to store the full information about the model evaluation. Consider an urn containing blue and red balls. We want to know the likelihood for the data set consisting of 10 random draws to contain 5 red and 5 blue balls. Each of our model evaluations will only include 1 drawn ball, from which we'll evaluate the likelihood. We can then "average" these however we want -- but using only likelihoods, not underlying information about the colour of the balls drawn. However, by trivial symmetry, the likelihood is going to be the same for a model in which we've drawn a red ball or a blue one. So the average would have to be the same whether we have a million models out of which half had a red ball and half had a blue ball, or a million models in each of which a red ball was drawn...
 
 **Ilya (Jan 29, 2026):**
 
 It occurred to me that we have some more thinking to do about how to make our likelihood unbiased.\
 \
-Consider the following simple problem.   We have observed a sample of 1 million people from around the globe and find only one is named Avi.  We have a forward model that allows us to predict the number of Avi's in the population and want to compute the likelihood of that model.  Our model has a single parameter, rate of Avi's per individual, lambda.  The expected number of Avi's among a million people is lambda\*10^6.  The likelihood of observing 1 Avi in a sample of a million is then given by the Poisson probability distribution\
-L = exp(-lambda\*10^6) (lambda\*10^6)^1 / 1! =  exp(-lambda\*10^6) (lambda\*10^6).\
+Consider the following simple problem. We have observed a sample of 1 million people from around the globe and find only one is named Avi. We have a forward model that allows us to predict the number of Avi's in the population and want to compute the likelihood of that model. Our model has a single parameter, rate of Avi's per individual, lambda. The expected number of Avi's among a million people is lambda\*10^6. The likelihood of observing 1 Avi in a sample of a million is then given by the Poisson probability distribution\
+L = exp(-lambda\*10^6) (lambda\*10^6)^1 / 1! = exp(-lambda\*10^6) (lambda\*10^6).\
 For example, for lambda=10^{-6}, the likelihood should be exp(-1).\
 \
-However, let's suppose we aren't quite smart enough to compute that, for a given lambda, the expected number of Avi's among a million people is lambda\*10^6.  Instead, we choose to do so with a Monte Carlo calculation.  We are going to draw a sample of S people from our forward model.  Then compute how many Avi's we expect, k\_S, by literally taking each of S people and picking them to be Avi with a probability of lambda and not Avi with a probability 1-lambda.  (In practice, to speed things up, we do this with a Poisson sampler, with parameter S\*lambda).  We then convert the predicted number of Avi's from S samples, k\_S, into a predicted number of Avi's from a million samples,\
+However, let's suppose we aren't quite smart enough to compute that, for a given lambda, the expected number of Avi's among a million people is lambda\*10^6. Instead, we choose to do so with a Monte Carlo calculation. We are going to draw a sample of S people from our forward model. Then compute how many Avi's we expect, k\_S, by literally taking each of S people and picking them to be Avi with a probability of lambda and not Avi with a probability 1-lambda. (In practice, to speed things up, we do this with a Poisson sampler, with parameter S\*lambda). We then convert the predicted number of Avi's from S samples, k\_S, into a predicted number of Avi's from a million samples,\
 k\_M = k\_S \* 10^6/S.\
 And finally compute our Monte Carlo estimate for the likelihood of our observed data (1 Avi in a million samples) as\
 \hat{L} = exp(-k\_M) k\_M^1 / 1! = exp(-k\_M) k\_M.\
-For example, for S=10^9 and lambda=10^{-6}, I happened to draw k\_S = 1038 samples, so the expected number per million is 1.038 and the Monte Carlo estimate for the likelihood is \hat{L}exp(-1.038)\*1.038.  In this particular case, the fractional error relative to the correct likelihood of exp(-1) is less than a part in a thousand.\
+For example, for S=10^9 and lambda=10^{-6}, I happened to draw k\_S = 1038 samples, so the expected number per million is 1.038 and the Monte Carlo estimate for the likelihood is \hat{L}exp(-1.038)\*1.038. In this particular case, the fractional error relative to the correct likelihood of exp(-1) is less than a part in a thousand.\
 \
-But it seems that I should be able to use the power of interpolation, too.  What if I distribute my N=10^9 allowed model evaluations into R runs, each of size S=N/R?  E.g., R=1 corresponds to the example above; R=1000000 would be a million runs of a thousand samples each; etc.  In this case, the interpolation is trivial, because I am going to do all of my runs for the same lambda of 10^{-6}.  Clearly, if I were to combine all of my runs together, for any R, I have the same total number of samples and should have the same accuracy of evaluating the likelihood.  But I don't do that; instead, for each run, I evaluate the likelihood, and then average the likelihoods -- because that's how our likelihood interpolation idea would work.\
+But it seems that I should be able to use the power of interpolation, too. What if I distribute my N=10^9 allowed model evaluations into R runs, each of size S=N/R? E.g., R=1 corresponds to the example above; R=1000000 would be a million runs of a thousand samples each; etc. In this case, the interpolation is trivial, because I am going to do all of my runs for the same lambda of 10^{-6}. Clearly, if I were to combine all of my runs together, for any R, I have the same total number of samples and should have the same accuracy of evaluating the likelihood. But I don't do that; instead, for each run, I evaluate the likelihood, and then average the likelihoods -- because that's how our likelihood interpolation idea would work.\
 \
-Well, I've done this test for lambda=10^{-6}, N=10^9, R going from 1 to a million, and the 'data' that Avi is one in a million. And the results don't look good.  Large R lead to a systematic and increasingly bad under-estimate of the likelihood.  I understand why, I just haven't figured out what to do about it yet.  But since I am going offline shortly, I'm sending this to you now so you can have fun thinking about it while I am hiking in Tasmania.&#x20;
+Well, I've done this test for lambda=10^{-6}, N=10^9, R going from 1 to a million, and the 'data' that Avi is one in a million. And the results don't look good. Large R lead to a systematic and increasingly bad under-estimate of the likelihood. I understand why, I just haven't figured out what to do about it yet. But since I am going offline shortly, I'm sending this to you now so you can have fun thinking about it while I am hiking in Tasmania.
 
 <figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
-
-
 **Avi (Jan 27, 2026):**
 
-> &#x20;Is that for a single COMPAS run?
+> Is that for a single COMPAS run?
 
 Each x-axis point marks a different COMPAS run (5M binaries, 32M binaries, 512M binaries ), using the same settings (I think -- these are Jeff's runs for this study).\
 \
@@ -235,19 +225,13 @@ I think your ideas of N/R is really interesting! I wonder if one can factor in a
 \
 Id imagine that in some regions of parameter space a small N might be because the rate is very low, and so we'd need to teach the GP to exclude that region.
 
-**Ilya (Jan 24, 2026):** Is that for a single COMPAS run?  I think the question is, if I can generate a fixed N binaries in total, what is the best way to split them across R runs, where I can vary R?  Am I better off having a large R (broad exploration of the parameter space) with few binaries (N/R) in each run?  I would think so, because interpolation essentially allows us to combine many nearby runs.  But is there a minimum threshold for N/R that we should not drop below (e.g., if we get zero BBHs from a run because the sample size is too small, is that run no longer useful)?
-
-
+**Ilya (Jan 24, 2026):** Is that for a single COMPAS run? I think the question is, if I can generate a fixed N binaries in total, what is the best way to split them across R runs, where I can vary R? Am I better off having a large R (broad exploration of the parameter space) with few binaries (N/R) in each run? I would think so, because interpolation essentially allows us to combine many nearby runs. But is there a minimum threshold for N/R that we should not drop below (e.g., if we get zero BBHs from a run because the sample size is too small, is that run no longer useful)?
 
 **Avi (Jan 21, 2026):** this is kindof the plot that we want to explore in the future -- X axis shows the size (N) of the COMPAS run, the uncertainty is higher for lower N -- but maybe its ok in some cases
 
-<figure><img src="../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
-
 <figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
-
-
-
+<figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 ##
 
@@ -257,54 +241,42 @@ Id imagine that in some regions of parameter space a small N might be because th
 
 **Meeting discussion points:**
 
-* Ilya expects 1D SFRa LnL to not peak at true but within +/- poission uncertainty&#x20;
-* For 1D LnL — what is rate of change?&#x20;
-* For 1D LnL — what is the correlation between SFRa and SFRd?&#x20;
+* Ilya expects 1D SFRa LnL to not peak at true but within +/- poission uncertainty
+* For 1D LnL — what is rate of change?
+* For 1D LnL — what is the correlation between SFRa and SFRd?
 * Lets skip LVK section
   * Discussion focuses on BO + tests
 
-
-
 ## Jan 20, 2026
 
-### **Goal:** reproduce same corners' as those in Jeff's paper (from the simulation study section).&#x20;
-
-
-
-
+### **Goal:** reproduce same corners' as those in Jeff's paper (from the simulation study section).
 
 #### Challenges — things dont seem to be matching up. (see discussions from June 12 2025):
 
-According to the paper: \
+According to the paper:\
 λ(α, σ, aSF , dSF ) = (−0.325, 0.213, 0.012, 4.253)\
 obs\_duration = 1 year ( 365.25 days)\
 \
 The weights from the dataset (obtained from Ilya) are plotted on the left.\
 \
-The output of Jeff's code `python rateSampler.py -a −0.325 -s 0.213 -A 0.012 -D 4.253` \
-(ie at the true value)  is plotted on the right\
+The output of Jeff's code `python rateSampler.py -a −0.325 -s 0.213 -A 0.012 -D 4.253`\
+(ie at the true value) is plotted on the right\
 np.sum(rate\_matrix)\~ 730\
 Ie rate of 730/year != expected rate of 578/year<br>
 
 ![](<../.gitbook/assets/image (1) (1).png>)
 
-
-
-
-
 #### Plan: Generate a similar dataset using same true params.
 
 From Ilya (July 11th):
 
-One concern is that something in the post-processing script has changed in more serious ways than we anticipated.  If that's true, then the mock data catalog was effectively drawn from a different model than the one you used to compute a likelihood, and all bets are off.  Jeff will investigate this once he is back in Australia (and I am checking our post-processing in parallel for another reason), but let's not delay your work in the meantime.\
+One concern is that something in the post-processing script has changed in more serious ways than we anticipated. If that's true, then the mock data catalog was effectively drawn from a different model than the one you used to compute a likelihood, and all bets are off. Jeff will investigate this once he is back in Australia (and I am checking our post-processing in parallel for another reason), but let's not delay your work in the meantime.\
 So here's my proposal.<br>
 
 * Run the post-processing (still using Jeff's data) for Jeff's choice of "true" parameter values.
-* Create your own mock catalog from that.  It won't be the same as Jeff's, so you won't be able to compare with his results, but at least it will be self-consistent.
+* Create your own mock catalog from that. It won't be the same as Jeff's, so you won't be able to compare with his results, but at least it will be self-consistent.
 * As a first step, don't include any measurement uncertainties -- pretend all measurements of individual events yield perfect parameters (just like Jeff initially did).
-* Carry out inference.  Are the true values now within your credible intervals?  Are the credible intervals sensible (e.g., as we discussed earlier, the fractional uncertainty on sfA should be around 1/sqrt{# observations}, maybe a tad larger because of parameter correlations).
-
-
+* Carry out inference. Are the true values now within your credible intervals? Are the credible intervals sensible (e.g., as we discussed earlier, the fractional uncertainty on sfA should be around 1/sqrt{# observations}, maybe a tad larger because of parameter correlations).
 
 **Results still not matching up**
 
@@ -315,10 +287,6 @@ Going back to some sanity checks (looking at events as delta functions — no po
 
 <div><figure><img src="../.gitbook/assets/data_matrix_0.1yr.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/expected_matrix_0.1yr (1).png" alt=""><figcaption></figcaption></figure></div>
 
-
-
-
-
 1D scan (keeping all params at true, varying one param)
 
 <figure><img src="../.gitbook/assets/lnl_1d_scan.png" alt=""><figcaption></figcaption></figure>
@@ -327,9 +295,7 @@ Now when i try to 'brute-force' compute the LnL at 5000 points sampled from a la
 
 <figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-**Maybe increasing the number of events? from 0.1 yr --> 3 yrs?**&#x20;
-
-
+**Maybe increasing the number of events? from 0.1 yr --> 3 yrs?**
 
 <div><figure><img src="../.gitbook/assets/data_matrix_3.0yr.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/expected_matrix_3.0yr.png" alt=""><figcaption></figcaption></figure></div>
 
@@ -337,25 +303,17 @@ Brute force + GP surrogate posterior... GP posteriors are biased.
 
 <div><figure><img src="../.gitbook/assets/lnl_surrogate_corner.png" alt="" width="375"><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/weighted_corner.png" alt="" width="375"><figcaption></figcaption></figure></div>
 
-
-
 Tweaking GP... and we get:
-
-
 
 _Diagnostics from bayesian optimisation_
 
 <figure><img src="../.gitbook/assets/diagnostics_round_9.png" alt=""><figcaption></figcaption></figure>
-
-
 
 _And the MCMC:_
 
 <figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 **What happens if we train a GP on the brute force points?**
-
-
 
 <figure><img src="../.gitbook/assets/lnl_surrogate_corner (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -370,12 +328,6 @@ What’s going on:
 We could improve by **throwing out low-LnL points...**
 
 ***
-
-
-
-
-
-
 
 * **Objective**: build a GP surrogate for f(λ) = -transform(LnL(λ)) over λ=(alpha, sigma, sfr\_a, sfr\_d) so BO can query informative points cheaply and MCMC can sample LnL(λ) via the surrogate (lnl\_surrogate.py (line 168)).
 * **Scaling / target transform (critical)**:
@@ -397,10 +349,6 @@ We could improve by **throwing out low-LnL points...**
   * The brute-force plot is a _weighted random scan_ (temperature-softmax weights), not an actual posterior sampled with the true likelihood; it can look different even if both agree near the peak (simulation\_study.py (line 703)).
   * The GP MCMC is a true sampler—but of the _surrogate_ likelihood; any residual surrogate bias (especially in tails/degeneracies) shifts the posterior. The uncertainty penalty makes it more conservative (often tighter/less multimodal) than a raw surrogate.
 
-
-
-
-
 ## 4 Dec 2025
 
 **Jeff's LVK dataset:**
@@ -418,28 +366,12 @@ We could improve by **throwing out low-LnL points...**
   * GWOSC coincident data from LIGO-H1, LIGO-L1: 243.4 days
   * Ref: [O3a](https://gwosc.org/timeline/show/O3a_4KHZ_R1/H1_DATA*L1_DATA/), [O3b](https://gwosc.org/timeline/show/O3b_4KHZ_R1/H1_DATA*L1_DATA/)
 * Selection FX
-  * [ we use O3 data but use ‘design’ sensitivity by default](https://github.com/TeamCOMPAS/COMPAS/blob/dev/compas_python_utils/cosmic_integration/selection_effects.py).
+  * [we use O3 data but use ‘design’ sensitivity by default](https://github.com/TeamCOMPAS/COMPAS/blob/dev/compas_python_utils/cosmic_integration/selection_effects.py).
   * What did Jeff use for the `selection fx`?
 
 <figure><img src="../.gitbook/assets/event_mcz_estimates_only_o3.png" alt=""><figcaption></figcaption></figure>
 
 My previous analysis used 57 events.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ##
 
@@ -447,7 +379,7 @@ My previous analysis used 57 events.
 
 **Action items:**
 
-1. **What is the sampling/statistical uncertainty?**&#x20;
+1. **What is the sampling/statistical uncertainty?**
 
 If we sample using the surrogate LnL (trained with large number of GP points), does the JS div settle at some point?
 
@@ -455,38 +387,28 @@ If we sample using the surrogate LnL (trained with large number of GP points), d
 
 2. Differences in Jeff + Avis aSF posterior:
 
-Likely due to the differences in the data + duration used. \
+Likely due to the differences in the data + duration used.\
 Lets try to make them as similar as possible...
-
-
 
 **Meeting notes:**
 
-* Train LnL, run MCMC N times (different random seed), see the divergence between the different plot \
+* Train LnL, run MCMC N times (different random seed), see the divergence between the different plot\
   See what the typical JS diveregence is just from samplinng
 * Difference in Jeff + Avi's poseriors, duratio normalisation
-* Also what is the size of the COMPAS dataset we are using&#x20;
+* Also what is the size of the COMPAS dataset we are using
 * **KEY QUESTIONS:**
-  * Experimental design:&#x20;
+  * Experimental design:
     * How to choose COMPAS models (eg acquisition function
     * How to most computationally efficetly approximmate true landscape in regions of high LnL
     * How many binaries do we really need to run?
 
-
-
-
-
-
-
 ## Sept 11, 2024 (Ilya + Avi)
 
-Why are my estimates not matching Jeff's?&#x20;
+Why are my estimates not matching Jeff's?
 
 <div><figure><img src="../.gitbook/assets/Screenshot 2024-09-11 at 4.01.32 PM.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/Screenshot 2024-09-11 at 3.58.00 PM.png" alt=""><figcaption><p>jeff's alpha=mu_z, jeffs sigma=sigma_0</p></figcaption></figure></div>
 
 <div><figure><img src="../.gitbook/assets/avi_params_32M.png" alt=""><figcaption><p>Avi's median params</p></figcaption></figure> <figure><img src="../.gitbook/assets/jeff_params_32M.png" alt=""><figcaption><p>Jeff's median params</p></figcaption></figure></div>
-
-
 
 **Paper:**
 
@@ -494,44 +416,28 @@ Why are my estimates not matching Jeff's?&#x20;
 * Proof of principle
 * We dont have to say anything about the 'true' universe, but show that we are building a pipeline for COMAS +LVK data --> results
 * Jeff alpha --> muz, Jeff Simga0--> sigma
-* CAN WE USE BOOTSTRAP LNL IN THE GP TRAINING?&#x20;
-
-
-
-
+* CAN WE USE BOOTSTRAP LNL IN THE GP TRAINING?
 
 ## July 17, 2024 (Flatiron group meeting)
 
 Presented our project at Will Farr's GW group meeting
 
-![](<../.gitbook/assets/Screenshot 2024-09-11 at 12.29.22 PM.png>)&#x20;
+![](<../.gitbook/assets/Screenshot 2024-09-11 at 12.29.22 PM.png>)
 
 Got some feedback:
 
 Hey all — im visiting the CCA. I presented our work at the group meeting (hope thats fine!)Will (fairly) had concerns about<br>
 
 1. the way im cutting up the observed population (im cutting out events with median values outside our range)
-2. That we’re using SNR > 8 to help deal with selection effects, not using the search pipeline’s injection campaign&#x20;
+2. That we’re using SNR > 8 to help deal with selection effects, not using the search pipeline’s injection campaign
 
-Lieke had some ideas about exploring the low mass peak.I think she was more interested in the m1-q space. I dont think that our framework will be too challenging to use m1-q.  (but again, maybe out of the scope of this paper)
+Lieke had some ideas about exploring the low mass peak.I think she was more interested in the m1-q space. I dont think that our framework will be too challenging to use m1-q. (but again, maybe out of the scope of this paper)
 
 <figure><img src="../.gitbook/assets/ogc4_weights (1).png" alt=""><figcaption></figcaption></figure>
 
-
-
 Ilya: Indeed, we should not be arbitrarily ignoring events in a real analysis -- this is not a good way of determining which events do not match the channel. And we should work on improving our treatment of selection effects. But both are further things to tackle, not directly related to the surrogate likelihood modelling project.
 
-
-
 [<br>](https://files.slack.com/files-pri/TLLF6Q46S-F07E06KKDT7/ogc4_weights.png)
-
-
-
-
-
-
-
-
 
 ## June 28, 2024
 
@@ -539,16 +445,14 @@ Ilya: Indeed, we should not be arbitrarily ignoring events in a real analysis --
 
 <figure><img src="../.gitbook/assets/iTerm2.XP1LFM.lvk_lnl.png" alt=""><figcaption></figcaption></figure>
 
-* the top most plot is the likelihood that combines both the Poisson and the McZ grid,&#x20;
-* 2nd plot is the poisson LnL (looks like this follows the number of detections)&#x20;
-* 3rd plot is the McZ probability (the 5M dataset looks like it's quite different from the 32M and 512M)&#x20;
+* the top most plot is the likelihood that combines both the Poisson and the McZ grid,
+* 2nd plot is the poisson LnL (looks like this follows the number of detections)
+* 3rd plot is the McZ probability (the 5M dataset looks like it's quite different from the 32M and 512M)
 * 4th is the number of detections.
 
 this is telling us that the 5M run was not quite sufficient to get the exact likelihood; but I suspect that, if the actual number of observations is \~35, the natural fluctuations in the likelihood from the limited number of observations is such that you aren't losing much information from the imperfect likelihood model...
 
 The differences in the predictions from 5M and 32M runs are smaller than the Poisson scatter in the number of detections. If it's about how large of a run we will need once we have N detections, this is certainly relevant info. If it's about testing your pipeline, we should be fine with the 5M run...
-
-
 
 **It's probably worth raising questions like the following in the discussion**, just to show we are aware of them, but not trying to answer them here:
 
@@ -556,48 +460,32 @@ The differences in the predictions from 5M and 32M runs are smaller than the Poi
 * **How large** does the Monte Carlo binary population synthesis need to be to ensure that we are dominated by observational uncertainties / limited number of observations rather than by the limited number of model evaluations?
 * If the number of model evaluations is limited, what is the best way to spread them out when learning a surrogate likelihood model (a smaller number of Monte Carlo samples at a larger number of parameter space locations, or the reverse)?
 
-
-
-
-
-
-
 **Meeting notes:**
 
-* McZ Weights - Manually normalise each event's weights&#x20;
+* McZ Weights - Manually normalise each event's weights
 * Is there a difference in the Number of observations between the two COMPAS datasets ? The total predicted rates?
 * if the difference in the rates is 32 to 5
 * We have to normalise the number of binaries we create by the total star forming mass
 
-
-
-#### Paper draft:&#x20;
+#### Paper draft:
 
 [https://github.com/COMPAS-Surrogate/paper/raw/main-pdf/ms.pdf](https://github.com/COMPAS-Surrogate/paper/raw/main-pdf/ms.pdf)
 
 #### Analytical check
 
-
-
 1. **P(aSF|data) analytical test:**
 
-I've been trying to validate the surrogate model.&#x20;
+I've been trying to validate the surrogate model.
 
 * [#id-1-p-asf-or-d-analytical-check](meeting-minutes.md#id-1-p-asf-or-d-analytical-check "mention")
 * P(aSF, dSF, muz, sigma0 | d ) surrogate vs "variable" surrogate
 * P(aSF, dSF, muz, sigma0 | d ) surrogate using "feasability" regions
 
-
-
-
-
-
-
 ### 1) P(aSF|d) analytical check
 
 <figure><img src="../.gitbook/assets/aSF_posterior (1).png" alt="" width="320"><figcaption></figcaption></figure>
 
-#### LVK&#x20;
+#### LVK
 
 {% file src="../.gitbook/assets/5M_50_940pts.pdf" %}
 
@@ -639,10 +527,6 @@ I've been trying to validate the surrogate model.&#x20;
 
 {% file src="../.gitbook/assets/LNLs_32M_500000_780pts.pdf" %}
 
-
-
-
-
 2. **"feasibility" regions:**
 
 Still working on it... [toy model code here](https://github.com/COMPAS-Surrogate/active_learning_feasability_region).
@@ -657,49 +541,29 @@ Nice agreement! Previously, (see [#may-2nd-2024](meeting-minutes.md#may-2nd-2024
 
 ### 2) P(aSF, dSF, muz, sigma0 | d ) surrogate vs "variable" surrogate
 
-
-
 Seems like the variable surrogate isnt doing so hot....
 
-
-
-
-
-
-
-
-
 <br>
-
-
 
 | Npts=10                                                                | Npts=30                                                                |
 | ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | <img src="../.gitbook/assets/npts_10.png" alt="" data-size="original"> | <img src="../.gitbook/assets/npts_30.png" alt="" data-size="original"> |
 
-
-
-
-
-
-
 ## May 2nd, 2024
 
 **Summary:**
 
-*   Added **LnL uncertainty check** in 'regret' plots&#x20;
+*   Added **LnL uncertainty check** in 'regret' plots
 
     * Bug: i'm plotting the _final_ GP uncertainty rather than the uncertainty at each stage... (the initial uncertainty is large, and eventually becomes smaller once we have acquired more points. We dont see this as I accidentally just display the _final_ GP uncertainty)
 
     <figure><img src="../.gitbook/assets/bo_metrics_round1_15pts.png" alt=""><figcaption></figcaption></figure>
 
-    * P(aSF|d) sanity check: MCMC posteriors seem wider than analytical...&#x20;
+    * P(aSF|d) sanity check: MCMC posteriors seem wider than analytical...
 
     <figure><img src="../.gitbook/assets/aSF_posterior.png" alt=""><figcaption></figcaption></figure>
 
     <div><figure><img src="../.gitbook/assets/round_round0_10pts.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/round_round1_15pts.png" alt=""><figcaption></figcaption></figure></div>
-
-
 
     * **The analytical VS the surrogate posterior arnt great:** maybe manually generate the training-set for the GP (dont even bother with the acquisition function).
       * Plot the LnL surface near the posterior peak region...
@@ -709,24 +573,18 @@ Seems like the variable surrogate isnt doing so hot....
     * Variable LnL /increased MCMC iterations -> Appear to give visually consistent results with the normal LnL/sampler settings
     *
 
-        <figure><img src="../.gitbook/assets/round1_15pts_mcmccompare_corner.png" alt=""><figcaption></figcaption></figure>
+    ```
+    <figure><img src="../.gitbook/assets/round1_15pts_mcmccompare_corner.png" alt=""><figcaption></figcaption></figure>
+    ```
 
-        <figure><img src="../.gitbook/assets/round0_10pts_variablecompare_corner.png" alt=""><figcaption></figcaption></figure>
+    ```
+    <figure><img src="../.gitbook/assets/round0_10pts_variablecompare_corner.png" alt=""><figcaption></figcaption></figure>
+    ```
 
 <figure><img src="../.gitbook/assets/round1_15pts_variablecompare_corner.png" alt=""><figcaption></figcaption></figure>
 
-
-
-
-
 * Acquisition function bug:
-  * When using the largest dataset from Jeff's work, the acquisition function fails to acquire a new 'better' point...&#x20;
-
-
-
-
-
-
+  * When using the largest dataset from Jeff's work, the acquisition function fails to acquire a new 'better' point...
 
 **Analytical P(aSF|d) Sanity check notes**
 
@@ -738,14 +596,12 @@ From Ilya (COMPAS slack, April 23rd)
 4. Assuming a flat broad prior on a (with a \geq 0), the posterior is proportional to the likelihood up to normalisation; since mu\_1 and d are constants, the posterior is proportional to p(a|n) \propto exp(-mu\_1 a) a^n.
 5. Then the expectation value of a (the mean of the posterior on a) is given by \<a> = \int\_0^\infty exp(-mu\_1 a) a^n a da / \int\_0^\infty exp(-mu\_1 a) a^n da.
 6. Similarly, \<a^2> = = \int\_0^\infty exp(-mu\_1 a) a^n a^2 da / \int\_0^\infty exp(-mu\_1 a) a^n da, from which the expected uncertainty on a, \sigma\_a, can be computed via \sigma\_a^2 = \<a^2>-\<a>^2.
-7. The integrals can be evaluated numerically or written as Gamma functions, by noticing that they all have the form \int\_0^\infty exp(-m a) a^k da =  \int\_0^\infty exp(-b) (b/m)^k db/m = m^{-k-1} \int\_0^\infty exp(-b) b^k db = m^{-(k+1)} Gamma(k+1).
+7. The integrals can be evaluated numerically or written as Gamma functions, by noticing that they all have the form \int\_0^\infty exp(-m a) a^k da = \int\_0^\infty exp(-b) (b/m)^k db/m = m^{-k-1} \int\_0^\infty exp(-b) b^k db = m^{-(k+1)} Gamma(k+1).
 8. Approximately, however, we will expect the mean and peak of the posterior to be around \<a> \~ n/mu\_1 and its standard deviation to be approximately sigma\_a \~ \<a> / sqrt(n).
 
 ##
 
 ## April 18th, 2024
-
-
 
 **Summary of work**
 
@@ -754,11 +610,9 @@ From Ilya (COMPAS slack, April 23rd)
 
 **1) LnL Surface**
 
-<figure><img src="../.gitbook/assets/gp_with_true_vals.gif" alt=""><figcaption><p>Looks decent? Again, surrogate uncertainty large! </p></figcaption></figure>
+<figure><img src="../.gitbook/assets/gp_with_true_vals.gif" alt=""><figcaption><p>Looks decent? Again, surrogate uncertainty large!</p></figcaption></figure>
 
-
-
-<figure><img src="../.gitbook/assets/rounds (1).gif" alt=""><figcaption><p>'Deep-GP' not set up correctly... </p></figcaption></figure>
+<figure><img src="../.gitbook/assets/rounds.gif" alt=""><figcaption><p>'Deep-GP' not set up correctly...</p></figcaption></figure>
 
 **2) PP-Tests**
 
@@ -772,10 +626,6 @@ From Ilya (COMPAS slack, April 23rd)
 
 <figure><img src="../.gitbook/assets/pp_two_param.png" alt=""><figcaption></figcaption></figure>
 
-
-
-
-
 <figure><img src="../.gitbook/assets/pp_round1.png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../.gitbook/assets/pp_round4.png" alt=""><figcaption></figcaption></figure>
@@ -787,26 +637,24 @@ From Ilya (COMPAS slack, April 23rd)
 **Sanity checks:**
 
 * **Plot:** the surrogate uncertainty should contain the best 'training point' value:
-  * &#x20;$$|\Delta \ln\mathcal{L}| > 1 \ \&\&  \ln\mathcal{L} + |\Delta \ln\mathcal{L}| > \ln\mathcal{L}_{best}$$
-* **COMPARE**_:_ $$\Delta \ln\mathcal{L}(d| {\rm SF}[A])_{analytical} / \Delta \ln\mathcal{L}(d| {\rm SF}[A])_{surrogate} \propto  0$$
+  * $$|\Delta \ln\mathcal{L}| > 1 \ \&\& \ln\mathcal{L} + |\Delta \ln\mathcal{L}| > \ln\mathcal{L}_{best}$$
+* **COMPARE**_:_ $$\Delta \ln\mathcal{L}(d| {\rm SF}[A])_{analytical} / \Delta \ln\mathcal{L}(d| {\rm SF}[A])_{surrogate} \propto 0$$
   * Sf\[a] -> affects the number of events, will affect the overall scaling of the LnL surface
 
 **Variable LnL:**
 
 * Surrogate gives us $$\ln\mathcal{L} + |\Delta \ln\mathcal{L}|$$
-  *   We could compute $$\ln \mathcal{L}(d|\theta)_{\rm Variable} = \mathcal{N}( \mu=ln \mathcal{L}(d|\theta), \sigma= |\Delta \ln \mathcal{L}(d|\theta)|)$$
-
-
+  * We could compute $$\ln \mathcal{L}(d|\theta)_{\rm Variable} = \mathcal{N}( \mu=ln \mathcal{L}(d|\theta), \sigma= |\Delta \ln \mathcal{L}(d|\theta)|)$$
 * Create Surrogate model, two inference runs (one with variable LnL, one with just the mean LnL)
   * If posteriors are very different, systematic uncertainties are large --> we havent trained the surrogate well enough
   * If we ran longer, and created a better surrogate model, then the posteriors will start converging....
 
 **PP-Plots**
 
-* Add the number of training points in PP plots (and the acquisition function)&#x20;
+* Add the number of training points in PP plots (and the acquisition function)
 * How sensitive is the PP-Plot to:
   * Number of MCMC iterations
-  * Variable LnL vs mean LnL&#x20;
+  * Variable LnL vs mean LnL
   * Different acquisition functions
 
 **QS**
@@ -822,7 +670,7 @@ From Ilya (COMPAS slack, April 23rd)
 * Surrogate LnL simulation studies (and PP-test)
 * 4D COMPAS surrogate LnL -> Posterior (but used bogus COMPAS population)
 
-**Main goals:**&#x20;
+**Main goals:**
 
 * Investigate COMPAS LnL Surrogate with 'realistic' COMPAS output
 * Do 1D/2D surrogate posteriors eventually have the same KL-distances? (as we increase number of acquired training points)
@@ -830,15 +678,13 @@ From Ilya (COMPAS slack, April 23rd)
 
 **NEXT STEPS**
 
-* Lets make a sharper LnL peak, we can do this by&#x20;
+* Lets make a sharper LnL peak, we can do this by
   * Increase the number of detected events in mock dataset
   * Increase the prior range
 * 1D case: exploitation-acquisition or GP kernel -- is something messed up?
 * 2D case: animation of surrogate model + alongside True LnL surface
 * Chayan: to test out NN-LnLSurrogate to generate posteriors
 * Ignore dSF in 2D investigations for now -> Flat posterior
-
-
 
 ### 1D COMPAS LnL-Surrogate posteriors
 
@@ -872,27 +718,21 @@ From Ilya (COMPAS slack, April 23rd)
 
 #### aSF-dSF
 
-| Acquired points                                     | GP mean                                              | Posterior                                       | KL Distance                                                                     |
-| --------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------- |
-| ![](<../.gitbook/assets/eval_round2_47pts (1).png>) | ![](<../.gitbook/assets/round_round2_47pts (1).png>) | ![](../.gitbook/assets/round2_47pts_corner.png) | <img src="../.gitbook/assets/kl_distances (1).png" alt="" data-size="original"> |
+| Acquired points                               | GP mean                                        | Posterior                                       | KL Distance                                                                     |
+| --------------------------------------------- | ---------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------- |
+| ![](../.gitbook/assets/eval_round2_47pts.png) | ![](../.gitbook/assets/round_round2_47pts.png) | ![](../.gitbook/assets/round2_47pts_corner.png) | <img src="../.gitbook/assets/kl_distances (1).png" alt="" data-size="original"> |
 
 _<mark style="color:red;">negative KL distance?</mark>_
 
 * aSF increases the number of detections -- we expect the posterior 1sigma \~ sqrt(N)
 
-
-
 #### muz-sigma0
 
 <div><figure><img src="../.gitbook/assets/kl_distances (2).png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/bo_metrics_round2_55pts.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/eval_round2_55pts.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/round_round2_55pts.png" alt=""><figcaption></figcaption></figure></div>
 
-
-
-
-
 ### 4D COMPAS Lnl-Surrogate posteriors
 
-:cry: Posteriors dont look great... could this just be due to sampler settings?&#x20;
+:cry: Posteriors dont look great... could this just be due to sampler settings?
 
 ```
 niterations = 1000, nwalkers = 10
@@ -912,8 +752,6 @@ niterations = 1000, nwalkers = 10
 
 <div><figure><img src="../.gitbook/assets/kl_distances.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/bo_metrics_round16_95pts.png" alt=""><figcaption></figcaption></figure></div>
 
-
-
 ### Trying again with more points...
 
 |                                                   |                                                |
@@ -922,40 +760,34 @@ niterations = 1000, nwalkers = 10
 
 ### Trying with a 'deep' GP
 
-
-
 <div><figure><img src="../.gitbook/assets/round0_30pts_corner.png" alt=""><figcaption><p>30</p></figcaption></figure> <figure><img src="../.gitbook/assets/round3_90pts_corner.png" alt=""><figcaption><p>90</p></figcaption></figure> <figure><img src="../.gitbook/assets/round9_210pts_corner.png" alt=""><figcaption><p>210</p></figcaption></figure> <figure><img src="../.gitbook/assets/round24_510pts_corner.png" alt=""><figcaption><p>510</p></figcaption></figure> <figure><img src="../.gitbook/assets/round59_1210pts_corner.png" alt=""><figcaption><p>1210</p></figcaption></figure></div>
 
 <figure><img src="../.gitbook/assets/kl_distances (5).png" alt="" width="320"><figcaption></figcaption></figure>
 
-
-
 ## March 06, 2024
 
-| RHS LnL                                                                       | LHS LnL                                                                                               |
-| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| <p><span class="math">\log L(D|\lambda)</span></p><p></p>                     | $$\log L_{\rm Poisson}(N_{obs}|\lambda) + \log L_{Grid}(D|\lambda)$$                                  |
-| <p><span class="math">\log L_{\rm Poisson}(N_{obs}|\lambda)</span></p><p></p> | $$\log L_{\rm Poisson}(N_{obs}|\lambda) \propto N_{obs} \log(N_{model}(\lambda))-N_{model}(\lambda)$$ |
-| <p><span class="math">\log L_{Grid}(D|\lambda)</span></p><p></p>              | $$\sum^{N_{obs}} \log p(z=z_i, M_c=M_c,i | \lambda)$$                                                 |
+| RHS LnL                          | LHS LnL  |
+| -------------------------------- | -------- |
+| $$\log L(D$$                     | \lambda) |
+| $$\log L_{\rm Poisson}(N_{obs}$$ | \lambda) |
+| $$\log L_{Grid}(D$$              | \lambda) |
 
 Note -- for the Poisson LnL, we ignore terms that depend on the data only. These disappear on normalization, such as log(Nobs!) and permutation coefficients.
 
-
-
-&#x20;![plot\_cosmo\_0 010\_2 770\_2 900\_4 700\_0 035\_-0 230](https://github.com/COMPAS-Surrogate/pipeline/assets/15642823/7b7bfb06-54f4-43b0-ad0a-3223ac2564b2)
+![plot\_cosmo\_0 010\_2 770\_2 900\_4 700\_0 035\_-0 230](https://github.com/COMPAS-Surrogate/pipeline/assets/15642823/7b7bfb06-54f4-43b0-ad0a-3223ac2564b2)
 
 `aSF=0.01, dSF=4.70, mu_z=-0.01, sigma0=0.0`
 
 **Priors**
 
-<mark style="color:red;">is my Current fix valid:</mark> <mark style="color:red;"></mark><mark style="color:red;">`prob_of_mcz`</mark><mark style="color:red;">-> 0 if</mark>  $$N_{model}==0$$<mark style="color:red;">?</mark>
+<mark style="color:red;">is my Current fix valid:</mark> <mark style="color:red;">`prob_of_mcz`</mark><mark style="color:red;">-> 0 if</mark> $$N_{model}==0$$<mark style="color:red;">?</mark>
 
 Things to go over:
 
 * Toy simulation studies
 * LnL(Mc, z | COMPAS SF params) -> nan fix?
 * Surrogate LnL(Mc, z | COMPAS SF params) using 4 params?
-* Surrogate LnL(Mc, z | COMPAS SF params)  -> P(COMPAS SF params| Mc, z)
+* Surrogate LnL(Mc, z | COMPAS SF params) -> P(COMPAS SF params| Mc, z)
 * Next steps
 
 ### \[Toy] Simulation Studies
@@ -965,12 +797,12 @@ Things to go over:
   * Compute KL divergence WRT number of 'training' points for the surrogate
     * _Can we get low KL divergences? Can we use this as a stopping criterion for training?_
 * 2\) Posterior generation with surrogate LnL
-  * Simulate N datasets with some model,&#x20;
+  * Simulate N datasets with some model,
     * run PE using an analytical Bayesian framework
     * run PE using LnL surrogate **(stop using some automated critera)**
     * Compare corners + make PP plots -- are posteriors sensible?
 
-**Code for simulation studies:** [https://github.com/COMPAS-Surrogate/simulation\_study](https://github.com/COMPAS-Surrogate/simulation_study)&#x20;
+**Code for simulation studies:** [https://github.com/COMPAS-Surrogate/simulation\_study](https://github.com/COMPAS-Surrogate/simulation_study)
 
 ### 1) Multimodal LnL
 
@@ -992,13 +824,7 @@ Bimodal example
 
 ![](https://compas-surrogate.github.io/lnl_surrogate/_images/regret_multi.png)
 
-
-
-
-
 **KL Divergence**
-
-
 
 <div><figure><img src="../.gitbook/assets/true_vs_surrogate_rnd0.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/true_vs_surrogate_rnd1.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/true_vs_surrogate_rnd2.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/true_vs_surrogate_rnd3.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/true_vs_surrogate_rnd4.png" alt=""><figcaption></figcaption></figure></div>
 
@@ -1006,21 +832,17 @@ Bimodal example
 
 **Repeating 50 times:**
 
-<div><figure><img src="../.gitbook/assets/kl_divergence.png" alt=""><figcaption><p>KL Div decreases as we expect </p></figcaption></figure> <figure><img src="../.gitbook/assets/error_histogram.png" alt=""><figcaption><p>By iteration~15 we've reached the peak of the LnL surface</p></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/kl_divergence.png" alt=""><figcaption><p>KL Div decreases as we expect</p></figcaption></figure> <figure><img src="../.gitbook/assets/error_histogram.png" alt=""><figcaption><p>By iteration~15 we've reached the peak of the LnL surface</p></figcaption></figure></div>
 
 Looks like the the mix of exploration + exploitation seems to work? There is probably room for improvement here....
 
 @ JEFF -- maybe you can poke around this simulation study? (or construct more complex simulation studies -- eg an egg box? Or [Johannes Buchner (pymultinest)'](https://dynesty.readthedocs.io/en/latest/examples.html#exponential-wave)s exponential wave example?
 
-
-
 ### **2) Linear regression simulation study**
 
-| Regret (min acquired point, stopped at red line)                                                                                                                                                                               | Compare posteriors                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| <p></p><p><img src="../.gitbook/assets/regret_vs_kl.png" alt="Y-axis is the Min LnL (min acquired point, not the surrogate, the training data), the red line marks the &#x27;stopping critera&#x27;" data-size="original"></p> | <img src="../.gitbook/assets/corner (3).png" alt="" data-size="original"> |
-
-
+| Regret (min acquired point, stopped at red line)                                                                                                                                                                 | Compare posteriors                                                    |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| <img src="../.gitbook/assets/regret_vs_kl.png" alt="Y-axis is the Min LnL (min acquired point, not the surrogate, the training data), the red line marks the &#x27;stopping critera&#x27;" data-size="original"> | <img src="../.gitbook/assets/corner.png" alt="" data-size="original"> |
 
 <figure><img src="../.gitbook/assets/pp_plot.png" alt=""><figcaption></figcaption></figure>
 
@@ -1138,9 +960,7 @@ The `self.n_detections(duration)`--> 0 leading to the nan
 
 </details>
 
-<mark style="color:red;">is my Current fix valid:</mark> <mark style="color:red;"></mark><mark style="color:red;">`prob_of_mcz`</mark><mark style="color:red;">-> 0 if</mark>  $$N_{model}==0$$
-
-
+<mark style="color:red;">is my Current fix valid:</mark> <mark style="color:red;">`prob_of_mcz`</mark><mark style="color:red;">-> 0 if</mark> $$N_{model}==0$$
 
 ### LnL(BBH | COMPAS SF params) Surrogate
 
@@ -1148,9 +968,9 @@ The `self.n_detections(duration)`--> 0 leading to the nan
 
 <figure><img src="../.gitbook/assets/eval_round3.png" alt=""><figcaption></figcaption></figure>
 
-| \~10 Pts                                                                   | \~50 Pts                                                                       |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| <img src="../.gitbook/assets/func_round0.png" alt="" data-size="original"> | <img src="../.gitbook/assets/func_round3 (2).png" alt="" data-size="original"> |
+| \~10 Pts                                                                   | \~50 Pts                                                                   |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| <img src="../.gitbook/assets/func_round0.png" alt="" data-size="original"> | <img src="../.gitbook/assets/func_round3.png" alt="" data-size="original"> |
 
 ### P(COMPAS SF param | BBH)
 
