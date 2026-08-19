@@ -4,6 +4,12 @@
 
 Catch up with Jeff.
 
+We went over the COMPAS size stuff, and decided next steps are to run post-proc on 512M dataset
+
+Also that the old GP packages are dead — moving to gpJax etc.
+
+
+
 ### Finite COMPAS sample size — answering Ilya's May 10 question
 
 **Question (Ilya, May 10):** does marginalising the likelihood over the finite COMPAS sample size remove the systematic downward bias?
@@ -17,16 +23,16 @@ Catch up with Jeff.
 * The error always goes the same way: **we under-estimate the likelihood, never over-estimate it.**
 * Worst case: if a COMPAS run predicts zero detections, the likelihood is exactly zero. Averaging lots of zeros destroys the answer. This is what Ilya's January plot was showing.
 
-#### ⚠️ Two different biases — do not mix them up
+#### ⚠️ We have two different biases --> cant mix them up
 
 There are two versions of "the bias", and they are **not** the same number:
 
-| | what it is | when it applies |
-| --- | --- | --- |
-| **(a)** `ln E[L̂]` | run COMPAS many times, average the **likelihoods**, then take the log | Ilya's "split N binaries into R runs" question |
-| **(b)** `E[ln L̂]` | run COMPAS **once**, take the log — this is what the **GP is trained on** | **our pipeline** |
+|                    | what it is                                                                | when it applies                                |
+| ------------------ | ------------------------------------------------------------------------- | ---------------------------------------------- |
+| **(a)** `ln E[L̂]` | run COMPAS many times, average the **likelihoods**, then take the log     | Ilya's "split N binaries into R runs" question |
+| **(b)** `E[ln L̂]` | run COMPAS **once**, take the log — this is what the **GP is trained on** | **our pipeline**                               |
 
-Jensen's inequality means (a) ≠ (b), and for this estimator they differ a lot. Everything below about *our* results uses **(b)**.
+Jensen's inequality means (a) ≠ (b), and for this estimator they differ a lot. Everything below about _our_ results uses **(b)**.
 
 #### (a) Ilya's question: averaging over runs
 
@@ -39,13 +45,13 @@ Jensen's inequality means (a) ≠ (b), and for this estimator they differ a lot.
 | 10  | −0.05       | OK      |
 | 100 | −0.005      | fine    |
 
-<figure><img src="../.gitbook/assets/fsb_bias_vs_t.png" alt=""><figcaption>Bias of the averaged likelihood vs t. Dotted lines mark where our COMPAS runs sit for a 1 yr (~750 event) mock.</figcaption></figure>
+<figure><img src="../.gitbook/assets/fsb_bias_vs_t.png" alt=""><figcaption><p>Bias of the averaged likelihood vs t. Dotted lines mark where our COMPAS runs sit for a 1 yr (~750 event) mock.</p></figcaption></figure>
 
 #### (b) Our case: one run, GP trained on lnL
 
 The algebra collapses to something much simpler:
 
-> **bias = n · ( E[ln k] − ln E[k] ) ≈ − N\_obs / (2 · N\_eff)**,  k ~ Poisson(N\_eff)
+> **bias = n · ( E\[ln k] − ln E\[k] ) ≈ − N\_obs / (2 · N\_eff)**, k \~ Poisson(N\_eff)
 
 * Depends on **N\_eff alone** — the `mu(λ)` dependence cancels exactly, so it does not matter where we sit relative to the likelihood peak.
 * Always negative, so **we always under-estimate lnL**.
@@ -60,9 +66,9 @@ Since posterior widths are set by ΔlnL ≈ 0.5, we want **N\_eff ≳ 10 × N\_o
 * The choice of prior barely matters (scanned p(k) ∝ k^(a−1), a = 0 … 2; all agree to 3 decimals for t ≳ 1).
 * its a band-aid, consistent with Ilya's own March 31 conclusion that no way of combining likelihoods recovers information the simulation never had...
 
-#### HOWEVER: our runs are far smaller than they look!&#x20;
+#### HOWEVER: our runs are far smaller than they look!
 
-* The cosmic integration **weights each binary** by how much star formation happened at its metallicity and redshift.&#x20;
+* The cosmic integration **weights each binary** by how much star formation happened at its metallicity and redshift.
 * Those weights are wildly uneven, so the _effective_ number of binaries is much smaller than the raw count.
 
 | run | raw merging BBHs | **effective** | efficiency |
@@ -70,45 +76,47 @@ Since posterior widths are set by ΔlnL ≈ 0.5, we want **N\_eff ≳ 10 × N\_o
 | 5M  | 13,019           | 163           | **1.25%**  |
 | 32M | 83,145           | 1,018         | **1.22%**  |
 
-> ⚠️ N\_eff must be computed over **systems**, not over (system × redshift) cells. Redshift is a deterministic integration grid, so its cells are perfectly correlated within a binary and are not independent samples. Counting them inflates N\_eff by ~24%.
+> ⚠️ N\_eff must be computed over **systems**, not over (system × redshift) cells. Redshift is a deterministic integration grid, so its cells are perfectly correlated within a binary and are not independent samples. Counting them inflates N\_eff by \~24%.
 
 * **0.45% of merging BBHs carry 50% of the total detection rate** — identical in both runs.
-* The ~1.2% efficiency is the **same in both runs**, so it is structural. More binaries will not improve the *efficiency*.
+* The \~1.2% efficiency is the **same in both runs**, so it is structural. More binaries will not improve the _efficiency_.
 * Effective count scales **linearly** with run size, so it is purely a question of how big a run we pay for.
 * Per McZ grid bin the median effective count is **1.9 (5M)** and **8.4 (32M)** — each pixel of the model grid rests on a handful of binaries.
 
-#### Why is the efficiency so low? Mostly *not* metallicity sampling
+#### Why is the efficiency so low? Mostly _not_ metallicity sampling
 
 COMPAS samples metallicity uniform-in-log, but the cosmic integration re-weights by a log-normal dP/dZ. That mismatch is real and large:
 
-| log10 Z        | % of systems | % of the rate |
-| -------------- | ------------ | ------------- |
-| < −3.07        | 54%          | **0.1%**      |
-| −2.45 … −2.14  | 9%           | **74%**       |
+| log10 Z       | % of systems | % of the rate |
+| ------------- | ------------ | ------------- |
+| < −3.07       | 54%          | **0.1%**      |
+| −2.45 … −2.14 | 9%           | **74%**       |
 
-More than half the run sits at metallicities that contribute essentially nothing. **But fixing the metallicity sampling only buys ~×1.4**: summing the within-metallicity-bin N\_eff gives 1380 vs 1018 as-is. Even inside the dominant Z bin the efficiency is only ~12%, so the weight variance is dominated by **within-metallicity** scatter (detectability vs chirp mass, and the redshift/SFR weighting) — not by the choice of Z sampling. Adaptive Z sampling is worth having, but it is not a substitute for a bigger run.
+More than half the run sits at metallicities that contribute essentially nothing. **But fixing the metallicity sampling only buys \~×1.4**: summing the within-metallicity-bin N\_eff gives 1380 vs 1018 as-is. Even inside the dominant Z bin the efficiency is only \~12%, so the weight variance is dominated by **within-metallicity** scatter (detectability vs chirp mass, and the redshift/SFR weighting) — not by the choice of Z sampling. Adaptive Z sampling is worth having, but it is not a substitute for a bigger run.
 
-<figure><img src="../.gitbook/assets/fsb_weight_concentration.png" alt=""><figcaption>Left: a tiny fraction of binaries carries the whole rate. Right: effective binaries backing each McZ grid bin.</figcaption></figure>
+<figure><img src="../.gitbook/assets/fsb_weight_concentration.png" alt=""><figcaption><p>Left: a tiny fraction of binaries carries the whole rate. Right: effective binaries backing each McZ grid bin.</p></figcaption></figure>
 
 #### Which analyses are safe
 
 Single-run lnL bias, i.e. quantity **(b)**:
 
-| data                  | 5M     | 32M          | 512M (extrap.) |
-| --------------------- | ------ | ------------ | -------------- |
-| LVK O3, ~50 events    | −0.154 | **−0.025** ✅ | −0.002         |
-| mock 1 yr, ~750       | −2.314 | −0.369       | −0.023 ✅       |
-| mock 3 yr, ~2250      | −6.942 | −1.106 ❌     | −0.069         |
+| data                | 5M     | 32M          | 512M (extrap.) |
+| ------------------- | ------ | ------------ | -------------- |
+| LVK O3, \~50 events | −0.154 | **−0.025** ✅ | −0.002         |
+| mock 1 yr, \~750    | −2.314 | −0.369       | −0.023 ✅       |
+| mock 3 yr, \~2250   | −6.942 | −1.106 ❌     | −0.069         |
 
 * **The LVK analysis is fine with the 32M run.** This is the important one for the paper.
 * The 3 yr simulation study is **not** fine, even with 32M — and even the 512M run is only marginal for it. **Better to shorten the mock than to chase a bigger run.**
-* Run size needed for |bias| < 0.05: **~16M** binaries for 50 events, **~236M** for 750, **~707M** for 2250. Jeff's 512M run covers the 1 yr case comfortably.
+* Run size needed for |bias| < 0.05: **\~16M** binaries for 50 events, **\~236M** for 750, **\~707M** for 2250. Jeff's 512M run covers the 1 yr case comfortably.
 
 #### Problem 2: Does this explain the sfr\_a–sfr\_d ridge? Probably not
 
 <figure><img src="../.gitbook/assets/Screenshot 2026-08-19 at 10.31.21 am.png" alt=""><figcaption></figcaption></figure>
 
-A bias that is the same everywhere cancels out when we normalise the posterior. It only hurts if it **changes with the parameters**. "Tilt" here means `max(bias) − min(bias)` across the prior range in one direction, holding the other three at truth (N\_obs = 750):
+A bias that is the same everywhere cancels out when we normalise the posterior. It only hurts if it **changes with the parameters**.&#x20;
+
+BTW  `tilt= max(bias) − min(bias)` across the prior range in one direction, holding the other three at truth (N\_obs = 750):
 
 | direction | tilt, 5M  | tilt, 32M |
 | --------- | --------- | --------- |
@@ -118,9 +126,9 @@ A bias that is the same everywhere cancels out when we normalise the posterior. 
 | sfr\_a    | **0.000** | **0.000** |
 
 * The tilt sits in **alpha and sigma** (the metallicity parameters), which makes sense — they control which binaries get the big weights.
-* It is **exactly zero in sfr\_a**. Since the bias depends only on N\_eff, and sfr\_a is a pure amplitude that multiplies every weight equally, it *cannot* change N\_eff. The zero is exact by construction, not numerical luck.
-* So this effect **cannot** be what bends the sfr\_a–sfr\_d banana. That needs a different explanation — most likely the per-bin noise (only ~2–8 effective binaries per pixel) or the GP target scaling.
-* **But note the 5M numbers.** A 4.6 lnL differential tilt along alpha is ~10× the ΔlnL that sets 1σ. Any earlier result built on the 5M run has a badly distorted alpha/sigma likelihood surface.
+* It is **exactly zero in sfr\_a**. Since the bias depends only on N\_eff, and sfr\_a is a pure amplitude that multiplies every weight equally, it _cannot_ change N\_eff. The zero is exact by construction, not numerical luck.
+* So this effect **cannot** be what bends the sfr\_a–sfr\_d banana. That needs a different explanation — most likely the per-bin noise (only \~2–8 effective binaries per pixel) or the GP target scaling.
+* **But note the 5M numbers.** A 4.6 lnL differential tilt along alpha is \~10× the ΔlnL that sets 1σ. Any earlier result built on the 5M run has a badly distorted alpha/sigma likelihood surface.
 
 #### Another trade off
 
@@ -133,12 +141,12 @@ We tripled the event count without adding a single binary, so t dropped from 0.8
 
 #### ✅ Duration test: the ridge is NOT a finite-sample artifact
 
-Simulation study on the **same 32M run**, varying only the mock duration (250 training points, final round). Shortening the mock improves the bias ~3× (−1.11 → −0.37):
+Simulation study on the **same 32M run**, varying only the mock duration (250 training points, final round). Shortening the mock improves the bias \~3× (−1.11 → −0.37):
 
-| mock  | alpha        | sigma            | sfr\_a      | sfr\_d       | **corr(sfr\_a, sfr\_d)** |
-| ----- | ------------ | ---------------- | ----------- | ------------ | ------------------------ |
-| 3 yr  | +1.1σ        | **+1.7σ**        | +0.6σ       | +1.0σ        | **0.542**                |
-| 1 yr  | −0.4σ        | **+0.0σ** ✅      | +0.5σ       | +1.5σ        | **0.593**                |
+| mock | alpha | sigma       | sfr\_a | sfr\_d | **corr(sfr\_a, sfr\_d)** |
+| ---- | ----- | ----------- | ------ | ------ | ------------------------ |
+| 3 yr | +1.1σ | **+1.7σ**   | +0.6σ  | +1.0σ  | **0.542**                |
+| 1 yr | −0.4σ | **+0.0σ** ✅ | +0.5σ  | +1.5σ  | **0.593**                |
 
 Two clear conclusions:
 
@@ -158,11 +166,11 @@ emcee repeatedly failed bilby's burn-in check, with the autocorrelation estimate
 10,000-step chain -> needs 16,134
 ```
 
-An autocorrelation time of ~16k steps is a strongly degenerate posterior. **Next step: swap the surrogate sampler to dynesty**, which is immune to this. The surrogate is cheap, so it costs almost nothing, and it cleanly separates "real degeneracy" from "emcee cannot sample it".
+An autocorrelation time of \~16k steps is a strongly degenerate posterior. **Next step: swap the surrogate sampler to dynesty**, which is immune to this. The surrogate is cheap, so it costs almost nothing, and it cleanly separates "real degeneracy" from "emcee cannot sample it".
 
 #### Still open
 
-* **Not yet quantified:** the per-bin McZ grid term. All numbers above cover the Poisson count term only. The grid term is likely the bigger error budget (~34% noise per pixel at 32M) and needs a bootstrap over COMPAS systems.
+* **Not yet quantified:** the per-bin McZ grid term. All numbers above cover the Poisson count term only. The grid term is likely the bigger error budget (\~34% noise per pixel at 32M) and needs a bootstrap over COMPAS systems.
 * 0.1 yr leg of the duration scan still running.
 
 ## Jan-Aug 2026
