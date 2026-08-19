@@ -311,6 +311,47 @@ Empirically **worse than sqrt** at `d0=10`: 25/210 informative, best lnL −1037
 
 Best available config: `compression="sqrt"`, `exploration_fraction=1/3`, `cycle_length=30`, `refit_every=15`. That yields a posterior roughly right in shape (corr 0.82–0.96 vs 0.85) but **~2–2.5× too wide** and 1–1.7σ biased, and it does not improve with budget. Conservative rather than overconfident, but not yet correct. All single-seed, all on the toy.
 
+### Why the posterior is the wrong width — non-stationarity, and a local GP
+
+#### Profiling: 127 XLA compilations per BO step
+
+`JAX_LOG_COMPILES=1` gives **1272 compilations for 10 BO steps**. The training
+array grows one row per step, so JAX re-traces everything each time.
+
+```bash
+JAX_LOG_COMPILES=1 python script.py 2>&1 | grep -c "Compiling"
+```
+
+Other tools: `jax.profiler.trace()` → TensorBoard timeline; `py-spy top --pid <pid>` for a running process; and wrap timed sections in `jax.block_until_ready()` (JAX is async, so naive `time.time()` lies).
+
+#### The real cause of the width problem: the surface is non-stationary
+
+The lnL surface is a near-flat plateau plus a narrow peak. A **stationary** kernel (Matern52, one lengthscale per dimension) cannot represent both, so it compromises: lengthscales long enough for the plateau, which **smooth the peak and widen the posterior**. That is why the width plateaus at ~2.5× and never improves with budget — it is a model-misspecification floor, not a data problem.
+
+The compression search (sqrt/log/softlog) was really a search for a warping that makes the target stationary. Worth naming that explicitly.
+
+#### A local GP fixes the shape but overshoots the width
+
+Same BO run (sqrt target, 1/3-explore cycle 30, 210 pts, 60 informative); only the surrogate-fitting choice differs:
+
+| variant | n_train | width ratio | corr | \|bias\|/σ |
+| --- | --- | --- | --- | --- |
+| global (sqrt, all points) | 210 | 2.10 | 0.958 | 1.20 |
+| local, r=1000 | 60 | 0.29 | 0.395 | 0.25 |
+| **local, r=5000** | 104 | **0.27** | **0.830** | **0.06** |
+| _truth_ | | _1.00_ | _0.850_ | _0.00_ |
+
+Restricting the GP to the peak region — where the surface *is* roughly stationary, and where no output compression is needed — makes the **correlation and location essentially exact**. But the width flips from 2.1× too wide to 3.7× too **narrow**, which is the unsafe direction.
+
+Diagnosis: truncating the training set leaves no data beyond the cut radius, so the GP mean reverts to the local average out there — an artificial cliff, so lnL falls off faster than truth.
+
+**Next thing to try:** local GP + a sparse outer ring of anchor points (or a local GP whose constant mean is pinned to the floor value rather than the local mean). That should keep the exact shape while restoring the correct fall-off.
+
+#### VI and KDE — assessed, not adopted
+
+* **Sparse/variational GP (SVGP)**: would fix the recompilation problem (fixed inducing-point count → fixed shapes) and scale O(nm²) rather than O(n³). But inducing points typically *over*-smooth a narrow peak, so it would likely make the width **worse**. Use it for speed if n grows large; it is not a fix for accuracy.
+* **KDE**: a density estimator, not a function regressor. The task is regressing lnL(θ) from scattered evaluations, which KDE does not do. Only legitimate use is post-hoc smoothing of posterior samples for the KL/JS diagnostics.
+
 ## Jan-Aug 2026
 
 **(Basically inactive — messages on slack)**
