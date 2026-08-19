@@ -352,6 +352,178 @@ Diagnosis: truncating the training set leaves no data beyond the cut radius, so 
 * **Sparse/variational GP (SVGP)**: would fix the recompilation problem (fixed inducing-point count → fixed shapes) and scale O(nm²) rather than O(n³). But inducing points typically *over*-smooth a narrow peak, so it would likely make the width **worse**. Use it for speed if n grows large; it is not a fix for accuracy.
 * **KDE**: a density estimator, not a function regressor. The task is regressing lnL(θ) from scattered evaluations, which KDE does not do. Only legitimate use is post-hoc smoothing of posterior samples for the KL/JS diagnostics.
 
+### GP model selection WITHOUT BO — and a warning about single-seed results
+
+Surrogate quality is a supervised regression question, so measure it as one:
+fix the training set, score held-out accuracy and calibration
+(`docs/studies/subset_training/test_gp_model_selection.py`). Benefits:
+
+* removes BO's stochasticity, which was confounding every earlier comparison;
+* array shapes stay constant → JAX compiles **once**, not ~127 times per step;
+* held-out calibration needs **no ground truth**, so it transfers to real COMPAS;
+* seconds per config instead of minutes.
+
+#### ⚠️ Seed-to-seed scatter is enormous — single-seed tables are not results
+
+The same config (matern32+softlog, mixed regime) gave `rmse_peak` of **0.52 on
+one seed and 230 on another**. Every single-seed comparison earlier in these
+notes — compressions, acquisition schedules, local GP — is far less reliable
+than it looked. The harness now runs 5 seeds and reports medians and ranges.
+
+#### Results (5 seeds, median [min,max])
+
+**Random training set (0% informative — the pessimistic case):**
+
+Everything fails: `rmse_peak` 390–4000 lnL, `cov68 = 0.00` for every config.
+With no data near the peak, no kernel or transform helps. Compression still
+matters (≈400 vs ≈3500 for `none`), but the surrogate is unusable either way.
+**Random sampling alone cannot produce a valid surrogate** — acquisition is
+genuinely necessary, not an optimisation.
+
+**Mixed training set (25% informative — what working acquisition gives):**
+
+| kernel | compress | rmse_peak | cov68 | rmse_all |
+| --- | --- | --- | --- | --- |
+| **matern32** | **sqrt** | **26.2** [3.9, 50] | 0.03 | **2.1e3** |
+| matern52 | sqrt | 37.1 [1.9, 79] | 0.02 | 4.8e3 |
+| matern32 | softlog | 174 [**0.52**, 230] | 0.18 | 1.2e4 |
+| matern32 | log | 601 [1.9, 850] | 0.25 | 1.1e4 |
+| matern32 | none | 1.16e3 | 0.00 | 5.7e3 |
+
+* **`sqrt` is the most *reliable*** — best median and much the tightest spread. `log`/`softlog` have better best-cases (0.52!) but terrible medians and 1000× spread. This vindicates `sqrt` as the default, but for a different reason than assumed: **variance, not mean**.
+* `sqrt` is also 5× better globally (`rmse_all` 2.1e3 vs 1.1e4), which is why it is the one that keeps acquisition working.
+* Compression is essential: `none` is ~40× worse.
+* `matern32` marginally beats `matern52`.
+
+#### 🔴 The surrogate is still ~25x too inaccurate where it matters
+
+Best available config reaches **`rmse_peak` ≈ 26 lnL**. The posterior is defined
+by ΔlnL ~ 0.5–3, so the surrogate cannot currently resolve it at all. That single
+number explains everything downstream — wrong widths, unstable correlations,
+sign-flipped parameter correlations.
+
+**Target: peak-region RMSE ≈ 1 lnL.** Until then, posterior-level comparisons
+are measuring surrogate error, not method performance.
+
+#### Uncertainties are badly overconfident
+
+`cov68` never exceeds 0.25 against a target of 0.68, across every kernel and
+compression, in both regimes. Varying the GP noise (1e-3 … 0.3, and
+`optimise_noise=True`) does not fix it. This makes the `marginal`
+(`mu + sigma^2/2`) sampling target unreliable and is a prime suspect for the
+width problem.
+
+### 🔴 Two scoring bugs, and the real difficulty knob: DYNAMIC RANGE
+
+#### Scoring bugs (these invalidate several tables above)
+
+1. **Width denominator 10× too large.** Scripts divided by `WIDTH`, but the true
+   posterior σ is `sqrt(diag(COV))` = `WIDTH/sqrt(SCALE)` = `WIDTH/10`. So a
+   *correct* posterior scored **0.10**, not the "1.00" every script printed.
+2. **"Peak region" was ~45σ wide.** `rmse_peak` used `Delta lnL < KEEP_DELTA`
+   (=1000). The posterior lives at `Delta lnL < ~5`. So peak accuracy was being
+   measured almost entirely outside the posterior.
+
+Reinterpreting the local-GP table with the correct denominator:
+
+| variant | reported | **actual** |
+| --- | --- | --- |
+| global sqrt | 2.10 | **21× too wide**, bias **12σ** |
+| local r=5000 | 0.27 ("3.7× too narrow") | **2.7× too wide**, bias **0.6σ** |
+
+So the **local GP is a far bigger win than reported** (21× → 2.7× too wide;
+bias 12σ → 0.6σ), and the earlier "truncation makes it too narrow" story was
+wrong — it was never too narrow.
+
+#### Peak width and dynamic range are the SAME knob
+
+For a Gaussian, normalising the box corner to a fixed `Delta lnL` cancels the
+peak width exactly (`cov ∝ wf² × corner`, `corner ∝ 1/wf²`). So "is the toy too
+peaked?" *is* "is the dynamic range too large?".
+
+#### RMSE where the posterior lives (5 seeds, 250 training pts, sqrt compression)
+
+Target: RMSE << 0.5 lnL (the 1σ contour sits at `Delta lnL = 0.5`).
+
+| dynamic range | peak σ | 5% inf. | 15% | 30% | 60% |
+| --- | --- | --- | --- | --- | --- |
+| **1e2** | 6.2% of box | 1.04 | 0.77 | **0.54** | 0.96 |
+| **1e3** | 2.0% of box | 3.05 | 0.76 | 0.60 | **0.32** ✅ |
+| **1.8e4** (realistic) | 0.5% of box | 2.60 | 1.48 | **0.76** | 0.80 |
+
+(matern52; matern32 is worse everywhere and erratic at 1e3 — 28.7 at 15%.)
+
+* **matern52 > matern32**, confirmed across all regimes. The earlier matern32
+  preference was seed noise on a broken metric.
+* **~30% informative is the sweet spot** — 60% is often *worse* (the GP loses
+  the global structure that anchors its lengthscales).
+* **At realistic dynamic range the GP plateaus at ~0.8 lnL RMSE and never
+  becomes usable, at any informative fraction.** That is a model-misspecification
+  wall, not a data problem.
+
+#### Consequence: shrink the prior box
+
+The real COMPAS lnL spans ~1e5 across the prior (1 yr run: median Δ −317,
+min −1e5), i.e. at or beyond the hardest regime tested. The single most
+effective lever is to **reduce the dynamic range by narrowing the prior**:
+a coarse first pass to localise, then re-run BO in a much smaller box where the
+range is 1e2–1e3 and the GP demonstrably works. This is trust-region BO, and it
+is the same mechanism that made the local GP work.
+
+### ✅ Overconfidence gate — we are currently SAFE (too wide, not too narrow)
+
+Iterative prior narrowing is, structurally, **nested importance sampling with a
+GP proposal**. Worth naming as such in the paper — and it inherits nested
+sampling's failure mode: mass cut at an early stage can never be recovered, and
+the result then looks *confidently wrong*.
+
+Being too wide is conservative and safe. Being too narrow means claiming
+precision we do not have, and can exclude the truth. Only the second invalidates
+a result. Width ratio cannot distinguish them on real data, because it is scored
+against a truth we will not know — **coverage can**.
+
+#### Simulation-based calibration (`test_coverage_gate.py`)
+
+24 independent runs, each with a fresh true parameter vector, 30% informative,
+dynamic range 1e3, matern52 + sqrt. Records the quantile at which the truth sits
+in each 1D marginal; calibrated ⇒ Uniform(0,1).
+
+| param | cov68 (nominal 0.68) | cov90 | verdict |
+| --- | --- | --- | --- |
+| alpha | 1.00 | 1.00 | too wide (conservative) |
+| sigma | 1.00 | 1.00 | too wide (conservative) |
+| sfr\_a | 1.00 | 1.00 | too wide (conservative) |
+| sfr\_d | 1.00 | 1.00 | too wide (conservative) |
+
+**The truth falls inside the 68% interval in every single run.** So the current
+surrogate is safely conservative — *not* overconfident. Grossly so (coverage
+1.00 vs 0.68), but erring in the harmless direction.
+
+#### The gate is validated, not just asserted
+
+Artificially shrinking the saved posteriors confirms it fires:
+
+| shrink | cov68 | verdict |
+| --- | --- | --- |
+| 1.0 (as-is) | 1.00 | too wide |
+| 0.5 | 0.51 | **OVERCONFIDENT** |
+| 0.2 | 0.00 | **OVERCONFIDENT** |
+
+A 2× narrowing is enough to trip it.
+
+#### How to use it
+
+Run this gate **after every prior-narrowing stage**. Narrowing pushes widths
+down, and `log` compression has already produced genuinely too-narrow posteriors
+(3.3×), so the transition from safe to dangerous is reachable. The gate is what
+tells us when we have crossed it.
+
+Note SBC needs *known true parameters*, not a known posterior — so it validates
+the method on simulations, after which the method can be applied to real LVK
+data. For the real run the ground-truth-free checks (leave-one-out calibration,
+bootstrap correlation stability, posterior-predictive re-evaluation) remain the
+in-flight diagnostics.
+
 ## Jan-Aug 2026
 
 **(Basically inactive — messages on slack)**
