@@ -4,39 +4,128 @@
 
 ### Four-input inference update
 
-#### 1. What has changed
+#### 1. The change we are testing
 
-* We now train the likelihood surrogate directly in all four parameters: metallicity evolution `alpha`, metallicity spread `sigma`, star-formation-rate amplitude `a`, and star-formation-rate evolution `d`.
-* The exact amplitude calculation is still retained as an independent check. This is important because the older analysis fitted only the three shape parameters and reconstructed amplitude afterwards.
-* The present campaign uses the fixed 256M COMPAS population and the existing paper catalogues. It is an inference study, not a new stellar-evolution calculation.
+* We now train the GP directly in all four parameters: metallicity evolution `alpha`, metallicity spread `sigma`, star-formation-rate amplitude `a`, and star-formation-rate evolution `d`.
+* The older analysis trained the GP in the three shape parameters and integrated amplitude analytically. Keep that calculation as the independent reference for the new four-input fits.
+* The present study uses the fixed 256M COMPAS population and the existing paper catalogues. It tests inference for that fixed model; it is not a new stellar-evolution calculation.
 
-#### 2. What the first four-input results say
+#### 2. Checks before the production campaign
 
-* At the 16 September check, 15 of the 632 planned fits had been scored: **9 passed the posterior-accuracy checks and 6 failed**. None was numerically unresolved. These are the first jobs returned, so they are not a representative success rate.
-* At the final 2994-label budget, both BO and random fits passed for the two 10-event cases. For the 50- and 100-event cases scored so far, BO passed and IID-random failed. At 200 expected events, the perfect-measurement BO run timed out at 2934 labels and the random fit failed; the uncertain-measurement BO run passed and the random fit failed.
-* The main conclusion is therefore limited: **2994 labels are not enough to guarantee an accurate four-input posterior.** We need to understand the failures before treating the new method as a replacement for the baseline.
+* At fixed shape, the exact amplitude posterior is a prior-truncated Gamma distribution. Eight of nine 33-label GP fits reproduced it; the failed high-count fit had KL divergence **0.0193 nats**. This is a useful necessary check, but it does not validate the joint posterior.
+* At 400 labels, none of 24 joint fits passed. BO had the lower estimated KL divergence in all **12/12** matched BO/random pairs, although most GP integrations were initially unresolved.
+* Increasing the budget from 414 to 744 labels reduced the estimated KL divergence in **24/24** trajectories. BO was lower in **10/10** resolved pairs, with a median random-to-BO KL ratio of **3.74**, but no fit reached the `0.01`-nat accuracy threshold.
 
-#### 3. What this means for the draft
+#### 3. Current 2994-label campaign
 
-* The paper's new four-input table is an earlier, 15 September snapshot and needs updating before it is presented as current.
-* The GP-dependent figures in the draft still use the older three-input, amplitude-marginalised analysis. A four-parameter corner plot alone does not show that it came from a direct four-input fit.
-* The population-size, effective-pixel-support, event-weight, and physical-rate figures do not depend on the GP dimension and still apply.
-* We can say that the four-input pipeline is being tested. We cannot yet claim a validated four-input replacement, a general stopping rule, or a required number of random points.
+The production-sized campaign contains 632 planned fits: 330 BO, 226 IID-random, and 76 Sobol. Each fit starts with 64 scrambled-Sobol points plus 80 boundary anchors, adds three labels at a time, refits every 30 labels, and stops at 2994. Matched runs share the catalogue, initial design, GP model, and final budget.
 
-#### 4. Campaign status and runtime
+At the 16 September check, 15 fits had been scored: **9 accurate, 6 inaccurate, and 0 numerically unresolved**. These are submission-ordered early results, not a representative success rate.
 
-* Four jobs remain running. One 200-event perfect-measurement run timed out at 2934 labels and needs checkpoint recovery; this is not an accuracy failure.
-* The queued part of the Slurm array would not be held, so the 612 pending job IDs were saved and cancelled for later resubmission. They are not currently waiting in the queue.
-* Completed full fits take about **6.1–7.3 hours** on one CPU. The long jobs are actively progressing and use only about 2.2–2.6 GB of their 16 GB allocation, so this is not a memory stall.
-* The late-stage cost is dominated by refitting the exact GP. At 2994 labels, 20 optimiser steps take about **63 seconds**; a 250-step refit is therefore about **13 minutes**. Updating the GP between refits is much cheaper, so improving that update alone will not materially shorten a fit.
+| Expected events | Measurements | BO | IID random |
+| --- | --- | --- | --- |
+| 10 | Perfect | Pass | Pass |
+| 10 | Uncertain | Pass | Pass |
+| 50 | Perfect | Pass | Fail |
+| 50 | Uncertain | Pass | Fail |
+| 100 | Perfect | Pass | Fail |
+| 100 | Uncertain | Pass | Fail |
+| 200 | Perfect | Timed out at 2934 | Fail |
+| 200 | Uncertain | Pass | Fail |
 
-#### 5. Proposed next steps
+The limited conclusion is that BO is outperforming random in these first matched cases, but **2994 labels do not guarantee an accurate four-input posterior**. The timed-out BO run is incomplete, not an accuracy failure.
 
-* Keep the campaign inputs, code, and checkpoints fixed. Recover the timed-out fit with the same run identity.
-* Diagnose the failed four-input fits using local likelihood residuals, amplitude slices, and their checkpoint histories.
-* Measure the separate time spent on labels, conditioning, acquisition, refitting, and compilation at production-sized checkpoints.
-* Test warm-started refits on representative catalogues, then compare their posterior accuracy and selected BO points with the saved configuration before changing the production campaign.
-* For BO versus random, score matched saved checkpoints against the same independent references. Report the first checkpoint that passes and is confirmed at the following checkpoint; keep runs that have not passed as `>2994` rather than dropping them.
+#### 4. Figures already in the paper
+
+These figures remain useful for the meeting, but the GP-dependent ones below are from the validated **three-input, amplitude-marginalised baseline**. They should not be presented as results from the new direct four-input campaign.
+
+##### Corner plots and KL-divergence histories
+
+<figure><img src="../.gitbook/assets/gp4-status-20260916/posterior_stop_perfect.png" alt="Posterior corner plots and KL history for perfect measurements"><figcaption><p>Perfect measurements. Grey shows the early 25-point GP, blue shows the selected posterior, and black marks the injected parameters. The lower panel shows symmetric KL divergence against the independently checked late reference.</p></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/gp4-status-20260916/posterior_stop_uncertain.png" alt="Posterior corner plots and KL history for uncertain measurements"><figcaption><p>Uncertain measurements. The construction is paired with the perfect-measurement case, so the effect of measurement uncertainty can be compared directly.</p></figcaption></figure>
+
+Points to make while showing these:
+
+* The grey 25-point result is a visual starting point, not the operational initial design. Operational training starts at 58 labels.
+* The selected perfect-measurement budgets are 298 training labels plus 192 audit evaluations for 100 expected detections, and 358 plus 288 for 1000 expected detections.
+* The selected uncertain-measurement budgets are 298 plus 192 and 418 plus 384.
+* The black dot in each KL panel is the recorded audit stop. The late-GP KL curve helps display convergence, but the late GP was not used as the operational stopping rule.
+* The four plotted parameters do not imply a direct four-input GP: amplitude was reconstructed from the three-input posterior.
+
+##### Posterior contraction relative to the prior, and its cost
+
+<figure><img src="../.gitbook/assets/gp4-status-20260916/acquisition_summary.png" alt="Posterior contraction relative to the prior and likelihood-evaluation cost"><figcaption><p>Top: 68% posterior width divided by the corresponding prior width. Bottom: training and total audit cost at the selected stopping point.</p></figcaption></figure>
+
+* This summary uses 70 histories: five latent catalogues at seven expected counts, each with paired perfect and uncertain measurements.
+* All 70 selected baseline results pass the direct-reference checks.
+* `alpha` is the most strongly constrained parameter in this setup. Amplitude also contracts as the event count grows. `d` remains close to its prior width over much of the range, so the data provide comparatively little information about it.
+* Training costs span 238–478 likelihood labels; totals including audits span 334–958.
+* Across the 35 paired catalogues, uncertain measurements stopped earlier in 9 cases, at the same budget in 18, and later in 8. Broader posteriors therefore do not automatically make training cheaper.
+* This is the three-input stopping study, not the new four-input BO-versus-random efficiency result.
+
+##### From event information to inferred rates
+
+<figure><img src="../.gitbook/assets/gp4-status-20260916/paired_weights.png" alt="Perfect and uncertain event weights"><figcaption><p>The same 30-event latent catalogue viewed with perfect and uncertain measurements.</p></figcaption></figure>
+
+* This plot shows how measurement uncertainty spreads each event's contribution across the mass-redshift grid.
+* The displayed normalized weights are a view of event information; they are not posterior probabilities that an event belongs to a bin.
+
+<figure><img src="../.gitbook/assets/gp4-status-20260916/paired_rate_posterior.png" alt="Posterior detected-rate maps for perfect and uncertain measurements"><figcaption><p>Posterior detected-rate maps for the paired 30-event example.</p></figcaption></figure>
+
+* Both baseline posteriors are selected at 482 likelihood labels.
+* The panels show uncertainty in the latent expected rate. They are not replicated observed catalogues and contain no fresh Poisson or measurement noise.
+
+##### Posterior-predictive checks
+
+<figure><img src="../.gitbook/assets/gp4-status-20260916/posterior_predictive_30.png" alt="Posterior-predictive checks for the 30-event example"><figcaption><p>One thousand replicated catalogues for the paired 30-event example.</p></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/gp4-status-20260916/posterior_predictive_1200.png" alt="Posterior-predictive checks for the 1174-event example"><figcaption><p>One thousand replicated catalogues for the 1200-expected, 1174-observed example.</p></figcaption></figure>
+
+* These checks include fresh Poisson counts and fresh uncertain-measurement noise.
+* The bands are pointwise 90% intervals, not simultaneous acceptance regions.
+* A good result for these examples checks the displayed mass and redshift marginals; it is not a population-wide calibration result or a test of every feature of the joint distribution.
+
+##### Finite-population controls
+
+<figure><img src="../.gitbook/assets/gp4-status-20260916/cosmic_integration_physical.png" alt="Physical cosmic-integration calculation"><figcaption><p>How the fixed COMPAS population is reweighted by metallicity and star-formation history to predict detected rates.</p></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/gp4-status-20260916/population_likelihood_loss.png" alt="Finite-population likelihood discrepancy"><figcaption><p>Likelihood discrepancy for nested 8M–256M populations relative to the finite 512M reference.</p></figcaption></figure>
+
+* At 1000 expected detections, the discrepancy falls from **34.3 nats for 8M** to **0.40 nats for 256M**.
+* This shows sensitivity to population size. It does not prove that 256M is universally sufficient: the populations are nested, and 512M is still a finite reference rather than an infinite-population truth.
+
+<figure><img src="../.gitbook/assets/gp4-status-20260916/population_pixel_support.png" alt="Effective COMPAS systems per mass-redshift pixel"><figcaption><p>Effective weighted COMPAS support per mass-redshift pixel for 8M, 32M, and 512M populations.</p></figcaption></figure>
+
+* Unequal weights leave much less effective support than the raw binary count suggests. Grey pixels have zero predicted rate.
+* One binary contributes to several redshift cells, so the pixels are not independent simulation draws.
+* The current analysis uses roughly 10% chirp-mass bins and `dz=0.1`. We validate inference conditional on this grid; convergence with finer bins has not been established.
+
+#### 5. Runtime and warm-start result
+
+* Completed fits take **6.1–7.3 hours** on one CPU. The jobs were progressing and used 2.2–2.6 GB of 16 GB, so this was not a memory stall.
+* At 2994 labels, three direct likelihood calls take 0.013 s, acquisition takes 2.55 s, conditioning takes 1.48 s, and 20 hyperparameter-fit steps take **62.9 s**. The current 250-step refit is therefore about **13 minutes** by extrapolation and is the main late-run cost.
+* On one saved checkpoint, a 20-step warm Adam refit took 64 s and reduced centred peak-region likelihood RMSE from 0.38 to 0.34. A 20-iteration L-BFGS-B refit took 72 s and reduced it to 0.15, but hit its iteration limit. Neither change has passed the posterior-accuracy checks.
+* The 612 pending array entries were saved and cancelled for later resubmission; four jobs were left running. At the measured rate, completing 632 fits with four workers would take roughly **46 days**, before queue delays and recovery. This is a cost extrapolation, not an ETA.
+
+#### 6. Validation and provenance to retain
+
+* A fit passes only if the largest directed KL divergence is below **0.01 nats**, mean and interval-endpoint shifts are below **0.2 reference standard deviations**, and 68% and 95% interval-width changes are below **10%**.
+* GP accuracy and sampler accuracy are separate questions. The present campaign compares the GP posterior with numerical direct-likelihood references; it is not an end-to-end NUTS validation.
+* At fixed shape, amplitude follows the exact bounded Gamma result. The full amplitude posterior may be broader because amplitude correlates with the shape parameters.
+* Results are conditional on the current roughly 10% chirp-mass bins and `dz=0.1`; convergence with a finer grid has not been shown.
+* The compact fixed-population rate calculation agrees with the original calculation at 32 prior points to `1e-12`. Source and input hashes, labels, GP parameters, and random states are retained in the checkpoints.
+* Main records: `docs/studies/amplitude_gp/paper_campaign_20260915/`; frozen inputs: `paper_inputs_20260915/manifest.json`; runtime measurements: `runtime_20260916/`.
+
+#### 7. Decisions and next steps
+
+* Keep the existing three-input, amplitude-marginalised analysis as the validated reference until the direct four-input results pass the same checks.
+* Recover the timed-out fit with the same run identity. Keep failed and unresolved results visible.
+* Diagnose failed fits using local likelihood residuals, exact amplitude slices, and checkpoint histories.
+* Test warm-started refits on representative catalogues and compare both posterior accuracy and selected BO points before changing the production configuration.
+* Score matched BO and random checkpoints against the same independent references. Record the first passing checkpoint only when the following checkpoint confirms it; otherwise report the cost as `>2994`.
+* Update the paper's four-input table before circulation. The present table is an older 15 September snapshot.
+* The current claim is: the direct four-input method is under validation, and the early matched results favour BO over random. We do not yet have a validated four-input replacement, a general stopping rule, or a measured evaluation saving.
 
 ## August 19, 2026
 
