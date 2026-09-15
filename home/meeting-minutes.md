@@ -1,5 +1,15 @@
 # ⏲️ Meeting Minutes
 
+## Sept 16, 2026
+
+
+
+\<updates>
+
+
+
+
+
 ## August 19, 2026
 
 Catch up with Jeff.
@@ -7,8 +17,6 @@ Catch up with Jeff.
 We went over the COMPAS size stuff, and decided next steps are to run post-proc on 512M dataset
 
 Also that the old GP packages are dead — moving to gpJax etc.
-
-
 
 ### Finite COMPAS sample size — answering Ilya's May 10 question
 
@@ -71,15 +79,15 @@ Since posterior widths are set by ΔlnL ≈ 0.5, we want **N\_eff ≳ 10 × N\_o
 * The cosmic integration **weights each binary** by how much star formation happened at its metallicity and redshift.
 * Those weights are wildly uneven, so the _effective_ number of binaries is much smaller than the raw count.
 
-| run   | raw merging BBHs | **effective** | efficiency | eval cost |
-| ----- | ---------------- | ------------- | ---------- | --------- |
-| 5M    | 13,019           | 163           | **1.25%**  | 0.28 s    |
-| 32M   | 83,145           | 1,018         | **1.22%**  | 0.88 s    |
-| 512M  | 1,326,573        | 16,257        | **1.23%**  | **80 s**  |
+| run  | raw merging BBHs | **effective** | efficiency | eval cost |
+| ---- | ---------------- | ------------- | ---------- | --------- |
+| 5M   | 13,019           | 163           | **1.25%**  | 0.28 s    |
+| 32M  | 83,145           | 1,018         | **1.22%**  | 0.88 s    |
+| 512M | 1,326,573        | 16,257        | **1.23%**  | **80 s**  |
 
-> ✅ The 512M run (measured 2026-08-19) confirms both predictions: efficiency is constant at ~1.2% across a **100× range** of run sizes, and N\_eff scales linearly — extrapolation predicted 16,288, measured 16,257 (**0.2% off**).
+> ✅ The 512M run (measured 2026-08-19) confirms both predictions: efficiency is constant at \~1.2% across a **100× range** of run sizes, and N\_eff scales linearly — extrapolation predicted 16,288, measured 16,257 (**0.2% off**).
 >
-> ⚠️ But a likelihood evaluation on 512M costs **90× more** than on 32M (for only 16× the binaries — the 22 GB file thrashes memory). A 250-point surrogate takes ~5.5 h; a 100-injection PP study would take ~550 h. **512M is not usable for routine surrogate training.**
+> ⚠️ But a likelihood evaluation on 512M costs **90× more** than on 32M (for only 16× the binaries — the 22 GB file thrashes memory). A 250-point surrogate takes \~5.5 h; a 100-injection PP study would take \~550 h. **512M is not usable for routine surrogate training.**
 
 > ⚠️ N\_eff must be computed over **systems**, not over (system × redshift) cells. Redshift is a deterministic integration grid, so its cells are perfectly correlated within a binary and are not independent samples. Counting them inflates N\_eff by \~24%.
 
@@ -119,22 +127,22 @@ Single-run lnL bias, i.e. quantity **(b)**:
 
 <figure><img src="../.gitbook/assets/Screenshot 2026-08-19 at 10.31.21 am.png" alt=""><figcaption></figcaption></figure>
 
-A bias that is the same everywhere cancels out when we normalise the posterior. It only hurts if it **changes with the parameters**.&#x20;
+A bias that is the same everywhere cancels out when we normalise the posterior. It only hurts if it **changes with the parameters**.
 
-BTW  `tilt= max(bias) − min(bias)` across the prior range in one direction, holding the other three at truth (N\_obs = 750):
+BTW `tilt= max(bias) − min(bias)` across the prior range in one direction, holding the other three at truth (N\_obs = 750):
 
 | direction | tilt, 5M  | tilt, 32M | tilt, 512M |
 | --------- | --------- | --------- | ---------- |
 | alpha     | **4.64**  | 0.70      | **0.042**  |
 | sigma     | **2.20**  | 0.36      | **0.023**  |
-| sfr\_d    | 0.09      | 0.02      | ~0.001     |
+| sfr\_d    | 0.09      | 0.02      | \~0.001    |
 | sfr\_a    | **0.000** | **0.000** | **0.000**  |
 
-> 🔑 **Criterion correction.** The *absolute* bias cancels when the posterior is normalised (and is absorbed by the surrogate's target scaling). Only the **tilt** distorts the posterior. The earlier `N_eff ≳ 10 N_obs` rule was derived from the absolute bias and is too strict — the correct criterion is
+> 🔑 **Criterion correction.** The _absolute_ bias cancels when the posterior is normalised (and is absorbed by the surrogate's target scaling). Only the **tilt** distorts the posterior. The earlier `N_eff ≳ 10 N_obs` rule was derived from the absolute bias and is too strict — the correct criterion is
 >
-> **N\_eff ≳ 2 N\_obs**  (i.e. tilt < 0.5)
+> **N\_eff ≳ 2 N\_obs** (i.e. tilt < 0.5)
 >
-> This matches what we actually observed: 1 yr on 32M has an absolute bias of −0.37 (7× over the old rule) yet recovered σ *exactly*, because its tilt is only 0.70.
+> This matches what we actually observed: 1 yr on 32M has an absolute bias of −0.37 (7× over the old rule) yet recovered σ _exactly_, because its tilt is only 0.70.
 
 * The tilt sits in **alpha and sigma** (the metallicity parameters), which makes sense — they control which binaries get the big weights.
 * It is **exactly zero in sfr\_a**. Since the bias depends only on N\_eff, and sfr\_a is a pure amplitude that multiplies every weight equally, it _cannot_ change N\_eff. The zero is exact by construction, not numerical luck.
@@ -186,56 +194,56 @@ An autocorrelation time of \~16k steps is a strongly degenerate posterior. **Nex
 
 ### 🔴 The surrogate itself was invalid — acquisition, not sample size
 
-Follow-up (`docs/studies/subset_training/`) on a 4D toy tuned to COMPAS scale: real parameter box, lnL spanning ~5×10⁴, ~1–2% informative points (matching the observed 3 yr run). Ground truth known, so everything below is scored against it.
+Follow-up (`docs/studies/subset_training/`) on a 4D toy tuned to COMPAS scale: real parameter box, lnL spanning \~5×10⁴, \~1–2% informative points (matching the observed 3 yr run). Ground truth known, so everything below is scored against it.
 
 #### The surrogate was badly wrong — and we can detect it WITHOUT truth
 
 At 1.6% informative points the fitted GP is not merely imprecise:
 
-| diagnostic | result |
-| --- | --- |
-| leave-one-out calibration | z = −65, 8.8, −45, 4.5, −22, −17 → **0/6 within \|z\|≤2** |
-| bootstrap implied corr | −0.94 … **+1.65**, std **1.03** (>1 ⇒ GP mean not even locally convex) |
-| posterior-predictive re-evaluation | mean z = **−638** (off by ~1700σ at its own posterior draws) |
-| recovered corr(sfr\_a, sfr\_d) | **−0.98** vs true **+0.85** — *sign flipped* |
+| diagnostic                         | result                                                                 |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| leave-one-out calibration          | z = −65, 8.8, −45, 4.5, −22, −17 → **0/6 within \|z\|≤2**              |
+| bootstrap implied corr             | −0.94 … **+1.65**, std **1.03** (>1 ⇒ GP mean not even locally convex) |
+| posterior-predictive re-evaluation | mean z = **−638** (off by \~1700σ at its own posterior draws)          |
+| recovered corr(sfr\_a, sfr\_d)     | **−0.98** vs true **+0.85** — _sign flipped_                           |
 
 The first three need no ground truth → they belong in the pipeline as validity gates.
 
 #### Subsetting the training set does NOT help
 
-| harsh (1.6% informative) | n\_train | width ratio | corr | bias |
-| --- | --- | --- | --- | --- |
-| keep all | 2000 | 1.47 | 0.128 | 0.45 |
-| top-N only | 32 | **5.07** | 0.004 | 0.26 |
-| thinned | 230 | 2.47 | 0.057 | 0.31 |
+| harsh (1.6% informative) | n\_train | width ratio | corr  | bias |
+| ------------------------ | -------- | ----------- | ----- | ---- |
+| keep all                 | 2000     | 1.47        | 0.128 | 0.45 |
+| top-N only               | 32       | **5.07**    | 0.004 | 0.26 |
+| thinned                  | 230      | 2.47        | 0.057 | 0.31 |
 
 Dropping far-tail points makes it **worse** — they anchor the GP low, and without them σ explodes where there is no data. At 24% informative every strategy is fine. **The problem is not which points we keep; it is that too few are informative.**
 
 #### Root cause: BO was doing worse than random
 
-| target transform | informative acquired | best lnL found |
-| --- | --- | --- |
-| hard clip | 4/210 (1.9%) | −3046 |
-| _random baseline_ | _5/210 (2.4%)_ | _−793_ |
-| log | 23/210 (11%) | −129 |
-| sqrt | 36/210 (17%) | −36 |
-| linear | 37/210 (18%) | −20 |
+| target transform  | informative acquired | best lnL found |
+| ----------------- | -------------------- | -------------- |
+| hard clip         | 4/210 (1.9%)         | −3046          |
+| _random baseline_ | _5/210 (2.4%)_       | _−793_         |
+| log               | 23/210 (11%)         | −129           |
+| sqrt              | 36/210 (17%)         | −36            |
+| linear            | 37/210 (18%)         | −20            |
 
 **A tight clip flattens the far tail — the only gradient telling acquisition which way the peak is.** BO was blind, never accumulated points where the posterior lives, so the surrogate was fitted by extrapolation.
 
 #### Acquisition and sampling want OPPOSITE transforms
 
 * BO needs tail gradient → don't clip.
-* Sampling needs peak resolution → uncompressed, the posterior is ~10⁻⁴ of the GP range and comes out **10× too narrow**.
+* Sampling needs peak resolution → uncompressed, the posterior is \~10⁻⁴ of the GP range and comes out **10× too narrow**.
 
 Full loop (BO → GP → NUTS), scored against truth:
 
-| target | informative | conv | width ratio | corr | \|bias\|/σ |
-| --- | --- | --- | --- | --- | --- |
-| none | 26/210 | False | 2.79 | 0.958 | 0.65 |
-| **sqrt** | **35/210** | False | **1.93** | **0.822** | 1.33 |
-| log | 24/210 | True | **0.03** | 0.015 | 8.50 |
-| clip | 33/210 | False | 3.39 | 0.993 | 7.09 |
+| target   | informative | conv  | width ratio | corr      | \|bias\|/σ |
+| -------- | ----------- | ----- | ----------- | --------- | ---------- |
+| none     | 26/210      | False | 2.79        | 0.958     | 0.65       |
+| **sqrt** | **35/210**  | False | **1.93**    | **0.822** | 1.33       |
+| log      | 24/210      | True  | **0.03**    | 0.015     | 8.50       |
+| clip     | 33/210      | False | 3.39        | 0.993     | 7.09       |
 
 `log` fails badly: its inverse is `expm1`, which **amplifies GP error exponentially** → posterior 33× too narrow. `sqrt` wins because its inverse is only quadratic. Note `log` is the only variant that "converged" — **sampler convergence is not evidence of surrogate validity.**
 
@@ -255,7 +263,7 @@ Full loop (BO → GP → NUTS), scored against truth:
 
 #### The BO loop was spending 2/3 of its budget avoiding the peak
 
-`JaxActiveLearner.run` used a hard **sequential** split: the first `exploration_fraction` (default **2/3**) of steps on `predictive_variance`, the remaining 1/3 on expected improvement. `predictive_variance` maximises posterior variance, i.e. it deliberately samples *away* from existing data — including away from the peak. So in a 150-step run, 100 steps were spent not looking for the posterior.
+`JaxActiveLearner.run` used a hard **sequential** split: the first `exploration_fraction` (default **2/3**) of steps on `predictive_variance`, the remaining 1/3 on expected improvement. `predictive_variance` maximises posterior variance, i.e. it deliberately samples _away_ from existing data — including away from the peak. So in a 150-step run, 100 steps were spent not looking for the posterior.
 
 (The old trieste code alternated acquisitions with an adaptive split; the JAX rewrite dropped that.)
 
@@ -263,43 +271,43 @@ Now **cycled**: `exploration_fraction=1/3`, `cycle_length=30` — 10 explore the
 
 150 BO steps on the COMPAS-scale toy, sqrt target:
 
-| schedule | informative | best lnL | time |
-| --- | --- | --- | --- |
-| old: 2/3 explore block | 42/210 | −36.1 | 392 s |
-| 1/3 explore block | 62/210 | −26.9 | 541 s |
-| **NEW: 1/3 explore, cycle 30** | **60/210** | **−20.8** | **344 s** |
-| 1/3 explore, cycle 15 | 58/210 | −30.1 | 253 s |
-| pure exploit (EI only) | 62/210 | **−6.6** | 750 s |
-| _random_ | _5/210_ | _−792.9_ | |
+| schedule                       | informative | best lnL  | time      |
+| ------------------------------ | ----------- | --------- | --------- |
+| old: 2/3 explore block         | 42/210      | −36.1     | 392 s     |
+| 1/3 explore block              | 62/210      | −26.9     | 541 s     |
+| **NEW: 1/3 explore, cycle 30** | **60/210**  | **−20.8** | **344 s** |
+| 1/3 explore, cycle 15          | 58/210      | −30.1     | 253 s     |
+| pure exploit (EI only)         | 62/210      | **−6.6**  | 750 s     |
+| _random_                       | _5/210_     | _−792.9_  |           |
 
-The cycled schedule beats the old one on every axis (+43% informative, better peak, faster). **But pure exploitation beats everything** on these two metrics. ⚠️ Caveat: both metrics are *peak-focused* (best lnL, and "informative" = within KEEP_DELTA of the best). A good posterior needs coverage of the whole high-likelihood region, not just the mode — so this does **not** yet show EI-only gives the better posterior. Needs a posterior-scored rerun before concluding.
+The cycled schedule beats the old one on every axis (+43% informative, better peak, faster). **But pure exploitation beats everything** on these two metrics. ⚠️ Caveat: both metrics are _peak-focused_ (best lnL, and "informative" = within KEEP\_DELTA of the best). A good posterior needs coverage of the whole high-likelihood region, not just the mode — so this does **not** yet show EI-only gives the better posterior. Needs a posterior-scored rerun before concluding.
 
 #### Why the toy is slow: JAX recompilation, not the likelihood
 
-| | cost |
-| --- | --- |
-| toy `true_lnl` | **1.4 µs** (715k/s) |
-| GP hyperparameter refit | 0.33 s |
-| `predict_f`, same training shape | 14.5 ms |
-| `predict_f`, training set grew by 1 row | **995 ms** ← 68× |
+|                                         | cost                |
+| --------------------------------------- | ------------------- |
+| toy `true_lnl`                          | **1.4 µs** (715k/s) |
+| GP hyperparameter refit                 | 0.33 s              |
+| `predict_f`, same training shape        | 14.5 ms             |
+| `predict_f`, training set grew by 1 row | **995 ms** ← 68×    |
 
 The training array grows by one row every BO step, so **JAX re-traces and recompiles the whole GP predict path every step**. That, not the GP maths and certainly not the likelihood, is the bottleneck.
 
-Added `refit_every` (default **15**) to skip hyperparameter re-optimisation between steps — accuracy is unaffected (identical best lnL at 1/15/30) but it only buys ~1.3×, because it does not avoid the recompile. **The real fix is batch acquisition** (q points per iteration → q× fewer recompiles), or padding the training arrays to a fixed capacity.
+Added `refit_every` (default **15**) to skip hyperparameter re-optimisation between steps — accuracy is unaffected (identical best lnL at 1/15/30) but it only buys \~1.3×, because it does not avoid the recompile. **The real fix is batch acquisition** (q points per iteration → q× fewer recompiles), or padding the training arrays to a fixed capacity.
 
-⚠️ This applies to production too: the real duration scan ran at **7.11 s/step with a 0.88 s likelihood** — ~6 of every 7 seconds was surrogate overhead, not COMPAS. Active learning only pays when the likelihood is expensive *relative to the GP refit*; at 32M it is not.
+⚠️ This applies to production too: the real duration scan ran at **7.11 s/step with a 0.88 s likelihood** — \~6 of every 7 seconds was surrogate overhead, not COMPAS. Active learning only pays when the likelihood is expensive _relative to the GP refit_; at 32M it is not.
 
 #### More budget does NOT fix the posterior
 
 sqrt target, scored against truth:
 
-| BO steps | informative | best lnL | width ratio | corr | \|bias\|/σ |
-| --- | --- | --- | --- | --- | --- |
-| 150 | 35/210 | −36.1 | 1.93 | 0.822 | 1.33 |
-| 350 | 64/410 | −5.8 | 2.50 | 0.947 | 1.69 |
-| 700 | 102/760 | −13.2 | **2.54** | 0.963 | 1.12 |
+| BO steps | informative | best lnL | width ratio | corr  | \|bias\|/σ |
+| -------- | ----------- | -------- | ----------- | ----- | ---------- |
+| 150      | 35/210      | −36.1    | 1.93        | 0.822 | 1.33       |
+| 350      | 64/410      | −5.8     | 2.50        | 0.947 | 1.69       |
+| 700      | 102/760     | −13.2    | **2.54**    | 0.963 | 1.12       |
 
-The width **plateaus at ~2.5× too wide** — a systematic floor, not noise. Likely cause: sqrt inverts as `lnL = ref − (t·scale)²`, whose derivative is **0 at the peak**, so the transform flattens the likelihood exactly where the posterior lives.
+The width **plateaus at \~2.5× too wide** — a systematic floor, not noise. Likely cause: sqrt inverts as `lnL = ref − (t·scale)²`, whose derivative is **0 at the peak**, so the transform flattens the likelihood exactly where the posterior lives.
 
 #### `softlog` — a fix that did NOT work
 
@@ -309,14 +317,13 @@ Empirically **worse than sqrt** at `d0=10`: 25/210 informative, best lnL −1037
 
 #### State of the surrogate
 
-Best available config: `compression="sqrt"`, `exploration_fraction=1/3`, `cycle_length=30`, `refit_every=15`. That yields a posterior roughly right in shape (corr 0.82–0.96 vs 0.85) but **~2–2.5× too wide** and 1–1.7σ biased, and it does not improve with budget. Conservative rather than overconfident, but not yet correct. All single-seed, all on the toy.
+Best available config: `compression="sqrt"`, `exploration_fraction=1/3`, `cycle_length=30`, `refit_every=15`. That yields a posterior roughly right in shape (corr 0.82–0.96 vs 0.85) but **\~2–2.5× too wide** and 1–1.7σ biased, and it does not improve with budget. Conservative rather than overconfident, but not yet correct. All single-seed, all on the toy.
 
 ### Why the posterior is the wrong width — non-stationarity, and a local GP
 
 #### Profiling: 127 XLA compilations per BO step
 
-`JAX_LOG_COMPILES=1` gives **1272 compilations for 10 BO steps**. The training
-array grows one row per step, so JAX re-traces everything each time.
+`JAX_LOG_COMPILES=1` gives **1272 compilations for 10 BO steps**. The training array grows one row per step, so JAX re-traces everything each time.
 
 ```bash
 JAX_LOG_COMPILES=1 python script.py 2>&1 | grep -c "Compiling"
@@ -326,7 +333,7 @@ Other tools: `jax.profiler.trace()` → TensorBoard timeline; `py-spy top --pid 
 
 #### The real cause of the width problem: the surface is non-stationary
 
-The lnL surface is a near-flat plateau plus a narrow peak. A **stationary** kernel (Matern52, one lengthscale per dimension) cannot represent both, so it compromises: lengthscales long enough for the plateau, which **smooth the peak and widen the posterior**. That is why the width plateaus at ~2.5× and never improves with budget — it is a model-misspecification floor, not a data problem.
+The lnL surface is a near-flat plateau plus a narrow peak. A **stationary** kernel (Matern52, one lengthscale per dimension) cannot represent both, so it compromises: lengthscales long enough for the plateau, which **smooth the peak and widen the posterior**. That is why the width plateaus at \~2.5× and never improves with budget — it is a model-misspecification floor, not a data problem.
 
 The compression search (sqrt/log/softlog) was really a search for a warping that makes the target stationary. Worth naming that explicitly.
 
@@ -334,14 +341,14 @@ The compression search (sqrt/log/softlog) was really a search for a warping that
 
 Same BO run (sqrt target, 1/3-explore cycle 30, 210 pts, 60 informative); only the surrogate-fitting choice differs:
 
-| variant | n_train | width ratio | corr | \|bias\|/σ |
-| --- | --- | --- | --- | --- |
-| global (sqrt, all points) | 210 | 2.10 | 0.958 | 1.20 |
-| local, r=1000 | 60 | 0.29 | 0.395 | 0.25 |
-| **local, r=5000** | 104 | **0.27** | **0.830** | **0.06** |
-| _truth_ | | _1.00_ | _0.850_ | _0.00_ |
+| variant                   | n\_train | width ratio | corr      | \|bias\|/σ |
+| ------------------------- | -------- | ----------- | --------- | ---------- |
+| global (sqrt, all points) | 210      | 2.10        | 0.958     | 1.20       |
+| local, r=1000             | 60       | 0.29        | 0.395     | 0.25       |
+| **local, r=5000**         | 104      | **0.27**    | **0.830** | **0.06**   |
+| _truth_                   |          | _1.00_      | _0.850_   | _0.00_     |
 
-Restricting the GP to the peak region — where the surface *is* roughly stationary, and where no output compression is needed — makes the **correlation and location essentially exact**. But the width flips from 2.1× too wide to 3.7× too **narrow**, which is the unsafe direction.
+Restricting the GP to the peak region — where the surface _is_ roughly stationary, and where no output compression is needed — makes the **correlation and location essentially exact**. But the width flips from 2.1× too wide to 3.7× too **narrow**, which is the unsafe direction.
 
 Diagnosis: truncating the training set leaves no data beyond the cut radius, so the GP mean reverts to the local average out there — an artificial cliff, so lnL falls off faster than truth.
 
@@ -349,180 +356,129 @@ Diagnosis: truncating the training set leaves no data beyond the cut radius, so 
 
 #### VI and KDE — assessed, not adopted
 
-* **Sparse/variational GP (SVGP)**: would fix the recompilation problem (fixed inducing-point count → fixed shapes) and scale O(nm²) rather than O(n³). But inducing points typically *over*-smooth a narrow peak, so it would likely make the width **worse**. Use it for speed if n grows large; it is not a fix for accuracy.
+* **Sparse/variational GP (SVGP)**: would fix the recompilation problem (fixed inducing-point count → fixed shapes) and scale O(nm²) rather than O(n³). But inducing points typically _over_-smooth a narrow peak, so it would likely make the width **worse**. Use it for speed if n grows large; it is not a fix for accuracy.
 * **KDE**: a density estimator, not a function regressor. The task is regressing lnL(θ) from scattered evaluations, which KDE does not do. Only legitimate use is post-hoc smoothing of posterior samples for the KL/JS diagnostics.
 
 ### GP model selection WITHOUT BO — and a warning about single-seed results
 
-Surrogate quality is a supervised regression question, so measure it as one:
-fix the training set, score held-out accuracy and calibration
-(`docs/studies/subset_training/test_gp_model_selection.py`). Benefits:
+Surrogate quality is a supervised regression question, so measure it as one: fix the training set, score held-out accuracy and calibration (`docs/studies/subset_training/test_gp_model_selection.py`). Benefits:
 
 * removes BO's stochasticity, which was confounding every earlier comparison;
-* array shapes stay constant → JAX compiles **once**, not ~127 times per step;
+* array shapes stay constant → JAX compiles **once**, not \~127 times per step;
 * held-out calibration needs **no ground truth**, so it transfers to real COMPAS;
 * seconds per config instead of minutes.
 
 #### ⚠️ Seed-to-seed scatter is enormous — single-seed tables are not results
 
-The same config (matern32+softlog, mixed regime) gave `rmse_peak` of **0.52 on
-one seed and 230 on another**. Every single-seed comparison earlier in these
-notes — compressions, acquisition schedules, local GP — is far less reliable
-than it looked. The harness now runs 5 seeds and reports medians and ranges.
+The same config (matern32+softlog, mixed regime) gave `rmse_peak` of **0.52 on one seed and 230 on another**. Every single-seed comparison earlier in these notes — compressions, acquisition schedules, local GP — is far less reliable than it looked. The harness now runs 5 seeds and reports medians and ranges.
 
-#### Results (5 seeds, median [min,max])
+#### Results (5 seeds, median \[min,max])
 
 **Random training set (0% informative — the pessimistic case):**
 
-Everything fails: `rmse_peak` 390–4000 lnL, `cov68 = 0.00` for every config.
-With no data near the peak, no kernel or transform helps. Compression still
-matters (≈400 vs ≈3500 for `none`), but the surrogate is unusable either way.
-**Random sampling alone cannot produce a valid surrogate** — acquisition is
-genuinely necessary, not an optimisation.
+Everything fails: `rmse_peak` 390–4000 lnL, `cov68 = 0.00` for every config. With no data near the peak, no kernel or transform helps. Compression still matters (≈400 vs ≈3500 for `none`), but the surrogate is unusable either way. **Random sampling alone cannot produce a valid surrogate** — acquisition is genuinely necessary, not an optimisation.
 
 **Mixed training set (25% informative — what working acquisition gives):**
 
-| kernel | compress | rmse_peak | cov68 | rmse_all |
-| --- | --- | --- | --- | --- |
-| **matern32** | **sqrt** | **26.2** [3.9, 50] | 0.03 | **2.1e3** |
-| matern52 | sqrt | 37.1 [1.9, 79] | 0.02 | 4.8e3 |
-| matern32 | softlog | 174 [**0.52**, 230] | 0.18 | 1.2e4 |
-| matern32 | log | 601 [1.9, 850] | 0.25 | 1.1e4 |
-| matern32 | none | 1.16e3 | 0.00 | 5.7e3 |
+| kernel       | compress | rmse\_peak           | cov68 | rmse\_all |
+| ------------ | -------- | -------------------- | ----- | --------- |
+| **matern32** | **sqrt** | **26.2** \[3.9, 50]  | 0.03  | **2.1e3** |
+| matern52     | sqrt     | 37.1 \[1.9, 79]      | 0.02  | 4.8e3     |
+| matern32     | softlog  | 174 \[**0.52**, 230] | 0.18  | 1.2e4     |
+| matern32     | log      | 601 \[1.9, 850]      | 0.25  | 1.1e4     |
+| matern32     | none     | 1.16e3               | 0.00  | 5.7e3     |
 
-* **`sqrt` is the most *reliable*** — best median and much the tightest spread. `log`/`softlog` have better best-cases (0.52!) but terrible medians and 1000× spread. This vindicates `sqrt` as the default, but for a different reason than assumed: **variance, not mean**.
+* **`sqrt` is the most&#x20;**_**reliable**_ — best median and much the tightest spread. `log`/`softlog` have better best-cases (0.52!) but terrible medians and 1000× spread. This vindicates `sqrt` as the default, but for a different reason than assumed: **variance, not mean**.
 * `sqrt` is also 5× better globally (`rmse_all` 2.1e3 vs 1.1e4), which is why it is the one that keeps acquisition working.
-* Compression is essential: `none` is ~40× worse.
+* Compression is essential: `none` is \~40× worse.
 * `matern32` marginally beats `matern52`.
 
-#### 🔴 The surrogate is still ~25x too inaccurate where it matters
+#### 🔴 The surrogate is still \~25x too inaccurate where it matters
 
-Best available config reaches **`rmse_peak` ≈ 26 lnL**. The posterior is defined
-by ΔlnL ~ 0.5–3, so the surrogate cannot currently resolve it at all. That single
-number explains everything downstream — wrong widths, unstable correlations,
-sign-flipped parameter correlations.
+Best available config reaches **`rmse_peak` ≈ 26 lnL**. The posterior is defined by ΔlnL \~ 0.5–3, so the surrogate cannot currently resolve it at all. That single number explains everything downstream — wrong widths, unstable correlations, sign-flipped parameter correlations.
 
-**Target: peak-region RMSE ≈ 1 lnL.** Until then, posterior-level comparisons
-are measuring surrogate error, not method performance.
+**Target: peak-region RMSE ≈ 1 lnL.** Until then, posterior-level comparisons are measuring surrogate error, not method performance.
 
 #### Uncertainties are badly overconfident
 
-`cov68` never exceeds 0.25 against a target of 0.68, across every kernel and
-compression, in both regimes. Varying the GP noise (1e-3 … 0.3, and
-`optimise_noise=True`) does not fix it. This makes the `marginal`
-(`mu + sigma^2/2`) sampling target unreliable and is a prime suspect for the
-width problem.
+`cov68` never exceeds 0.25 against a target of 0.68, across every kernel and compression, in both regimes. Varying the GP noise (1e-3 … 0.3, and `optimise_noise=True`) does not fix it. This makes the `marginal` (`mu + sigma^2/2`) sampling target unreliable and is a prime suspect for the width problem.
 
 ### 🔴 Two scoring bugs, and the real difficulty knob: DYNAMIC RANGE
 
 #### Scoring bugs (these invalidate several tables above)
 
-1. **Width denominator 10× too large.** Scripts divided by `WIDTH`, but the true
-   posterior σ is `sqrt(diag(COV))` = `WIDTH/sqrt(SCALE)` = `WIDTH/10`. So a
-   *correct* posterior scored **0.10**, not the "1.00" every script printed.
-2. **"Peak region" was ~45σ wide.** `rmse_peak` used `Delta lnL < KEEP_DELTA`
-   (=1000). The posterior lives at `Delta lnL < ~5`. So peak accuracy was being
-   measured almost entirely outside the posterior.
+1. **Width denominator 10× too large.** Scripts divided by `WIDTH`, but the true posterior σ is `sqrt(diag(COV))` = `WIDTH/sqrt(SCALE)` = `WIDTH/10`. So a _correct_ posterior scored **0.10**, not the "1.00" every script printed.
+2. **"Peak region" was \~45σ wide.** `rmse_peak` used `Delta lnL < KEEP_DELTA` (=1000). The posterior lives at `Delta lnL < ~5`. So peak accuracy was being measured almost entirely outside the posterior.
 
 Reinterpreting the local-GP table with the correct denominator:
 
-| variant | reported | **actual** |
-| --- | --- | --- |
-| global sqrt | 2.10 | **21× too wide**, bias **12σ** |
+| variant      | reported                 | **actual**                       |
+| ------------ | ------------------------ | -------------------------------- |
+| global sqrt  | 2.10                     | **21× too wide**, bias **12σ**   |
 | local r=5000 | 0.27 ("3.7× too narrow") | **2.7× too wide**, bias **0.6σ** |
 
-So the **local GP is a far bigger win than reported** (21× → 2.7× too wide;
-bias 12σ → 0.6σ), and the earlier "truncation makes it too narrow" story was
-wrong — it was never too narrow.
+So the **local GP is a far bigger win than reported** (21× → 2.7× too wide; bias 12σ → 0.6σ), and the earlier "truncation makes it too narrow" story was wrong — it was never too narrow.
 
 #### Peak width and dynamic range are the SAME knob
 
-For a Gaussian, normalising the box corner to a fixed `Delta lnL` cancels the
-peak width exactly (`cov ∝ wf² × corner`, `corner ∝ 1/wf²`). So "is the toy too
-peaked?" *is* "is the dynamic range too large?".
+For a Gaussian, normalising the box corner to a fixed `Delta lnL` cancels the peak width exactly (`cov ∝ wf² × corner`, `corner ∝ 1/wf²`). So "is the toy too peaked?" _is_ "is the dynamic range too large?".
 
 #### RMSE where the posterior lives (5 seeds, 250 training pts, sqrt compression)
 
 Target: RMSE << 0.5 lnL (the 1σ contour sits at `Delta lnL = 0.5`).
 
-| dynamic range | peak σ | 5% inf. | 15% | 30% | 60% |
-| --- | --- | --- | --- | --- | --- |
-| **1e2** | 6.2% of box | 1.04 | 0.77 | **0.54** | 0.96 |
-| **1e3** | 2.0% of box | 3.05 | 0.76 | 0.60 | **0.32** ✅ |
-| **1.8e4** (realistic) | 0.5% of box | 2.60 | 1.48 | **0.76** | 0.80 |
+| dynamic range         | peak σ      | 5% inf. | 15%  | 30%      | 60%        |
+| --------------------- | ----------- | ------- | ---- | -------- | ---------- |
+| **1e2**               | 6.2% of box | 1.04    | 0.77 | **0.54** | 0.96       |
+| **1e3**               | 2.0% of box | 3.05    | 0.76 | 0.60     | **0.32** ✅ |
+| **1.8e4** (realistic) | 0.5% of box | 2.60    | 1.48 | **0.76** | 0.80       |
 
 (matern52; matern32 is worse everywhere and erratic at 1e3 — 28.7 at 15%.)
 
-* **matern52 > matern32**, confirmed across all regimes. The earlier matern32
-  preference was seed noise on a broken metric.
-* **~30% informative is the sweet spot** — 60% is often *worse* (the GP loses
-  the global structure that anchors its lengthscales).
-* **At realistic dynamic range the GP plateaus at ~0.8 lnL RMSE and never
-  becomes usable, at any informative fraction.** That is a model-misspecification
-  wall, not a data problem.
+* **matern52 > matern32**, confirmed across all regimes. The earlier matern32 preference was seed noise on a broken metric.
+* **\~30% informative is the sweet spot** — 60% is often _worse_ (the GP loses the global structure that anchors its lengthscales).
+* **At realistic dynamic range the GP plateaus at \~0.8 lnL RMSE and never becomes usable, at any informative fraction.** That is a model-misspecification wall, not a data problem.
 
 #### Consequence: shrink the prior box
 
-The real COMPAS lnL spans ~1e5 across the prior (1 yr run: median Δ −317,
-min −1e5), i.e. at or beyond the hardest regime tested. The single most
-effective lever is to **reduce the dynamic range by narrowing the prior**:
-a coarse first pass to localise, then re-run BO in a much smaller box where the
-range is 1e2–1e3 and the GP demonstrably works. This is trust-region BO, and it
-is the same mechanism that made the local GP work.
+The real COMPAS lnL spans \~1e5 across the prior (1 yr run: median Δ −317, min −1e5), i.e. at or beyond the hardest regime tested. The single most effective lever is to **reduce the dynamic range by narrowing the prior**: a coarse first pass to localise, then re-run BO in a much smaller box where the range is 1e2–1e3 and the GP demonstrably works. This is trust-region BO, and it is the same mechanism that made the local GP work.
 
 ### ✅ Overconfidence gate — we are currently SAFE (too wide, not too narrow)
 
-Iterative prior narrowing is, structurally, **nested importance sampling with a
-GP proposal**. Worth naming as such in the paper — and it inherits nested
-sampling's failure mode: mass cut at an early stage can never be recovered, and
-the result then looks *confidently wrong*.
+Iterative prior narrowing is, structurally, **nested importance sampling with a GP proposal**. Worth naming as such in the paper — and it inherits nested sampling's failure mode: mass cut at an early stage can never be recovered, and the result then looks _confidently wrong_.
 
-Being too wide is conservative and safe. Being too narrow means claiming
-precision we do not have, and can exclude the truth. Only the second invalidates
-a result. Width ratio cannot distinguish them on real data, because it is scored
-against a truth we will not know — **coverage can**.
+Being too wide is conservative and safe. Being too narrow means claiming precision we do not have, and can exclude the truth. Only the second invalidates a result. Width ratio cannot distinguish them on real data, because it is scored against a truth we will not know — **coverage can**.
 
 #### Simulation-based calibration (`test_coverage_gate.py`)
 
-24 independent runs, each with a fresh true parameter vector, 30% informative,
-dynamic range 1e3, matern52 + sqrt. Records the quantile at which the truth sits
-in each 1D marginal; calibrated ⇒ Uniform(0,1).
+24 independent runs, each with a fresh true parameter vector, 30% informative, dynamic range 1e3, matern52 + sqrt. Records the quantile at which the truth sits in each 1D marginal; calibrated ⇒ Uniform(0,1).
 
-| param | cov68 (nominal 0.68) | cov90 | verdict |
-| --- | --- | --- | --- |
-| alpha | 1.00 | 1.00 | too wide (conservative) |
-| sigma | 1.00 | 1.00 | too wide (conservative) |
-| sfr\_a | 1.00 | 1.00 | too wide (conservative) |
-| sfr\_d | 1.00 | 1.00 | too wide (conservative) |
+| param  | cov68 (nominal 0.68) | cov90 | verdict                 |
+| ------ | -------------------- | ----- | ----------------------- |
+| alpha  | 1.00                 | 1.00  | too wide (conservative) |
+| sigma  | 1.00                 | 1.00  | too wide (conservative) |
+| sfr\_a | 1.00                 | 1.00  | too wide (conservative) |
+| sfr\_d | 1.00                 | 1.00  | too wide (conservative) |
 
-**The truth falls inside the 68% interval in every single run.** So the current
-surrogate is safely conservative — *not* overconfident. Grossly so (coverage
-1.00 vs 0.68), but erring in the harmless direction.
+**The truth falls inside the 68% interval in every single run.** So the current surrogate is safely conservative — _not_ overconfident. Grossly so (coverage 1.00 vs 0.68), but erring in the harmless direction.
 
 #### The gate is validated, not just asserted
 
 Artificially shrinking the saved posteriors confirms it fires:
 
-| shrink | cov68 | verdict |
-| --- | --- | --- |
-| 1.0 (as-is) | 1.00 | too wide |
-| 0.5 | 0.51 | **OVERCONFIDENT** |
-| 0.2 | 0.00 | **OVERCONFIDENT** |
+| shrink      | cov68 | verdict           |
+| ----------- | ----- | ----------------- |
+| 1.0 (as-is) | 1.00  | too wide          |
+| 0.5         | 0.51  | **OVERCONFIDENT** |
+| 0.2         | 0.00  | **OVERCONFIDENT** |
 
 A 2× narrowing is enough to trip it.
 
 #### How to use it
 
-Run this gate **after every prior-narrowing stage**. Narrowing pushes widths
-down, and `log` compression has already produced genuinely too-narrow posteriors
-(3.3×), so the transition from safe to dangerous is reachable. The gate is what
-tells us when we have crossed it.
+Run this gate **after every prior-narrowing stage**. Narrowing pushes widths down, and `log` compression has already produced genuinely too-narrow posteriors (3.3×), so the transition from safe to dangerous is reachable. The gate is what tells us when we have crossed it.
 
-Note SBC needs *known true parameters*, not a known posterior — so it validates
-the method on simulations, after which the method can be applied to real LVK
-data. For the real run the ground-truth-free checks (leave-one-out calibration,
-bootstrap correlation stability, posterior-predictive re-evaluation) remain the
-in-flight diagnostics.
+Note SBC needs _known true parameters_, not a known posterior — so it validates the method on simulations, after which the method can be applied to real LVK data. For the real run the ground-truth-free checks (leave-one-out calibration, bootstrap correlation stability, posterior-predictive re-evaluation) remain the in-flight diagnostics.
 
 ## Jan-Aug 2026
 
