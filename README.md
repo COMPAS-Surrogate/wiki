@@ -30,3 +30,5 @@ This wiki contains notes related to the COMPAS LnL Surrogate project
 {% content-ref url="home/meeting-minutes.md" %}
 [meeting-minutes.md](home/meeting-minutes.md)
 {% endcontent-ref %}
+
+[Current four-input GP status and paper figure guide (16 September 2026)](home/four-input-gp-status.md)

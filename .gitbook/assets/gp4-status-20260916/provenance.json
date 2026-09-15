@@ -1,0 +1,42 @@
+{
+  "population_pixel_support.png": {
+    "source": "overleaf/figures/bo_study/population_pixel_support.png",
+    "sha256": "316b952843500956675987325e80414fd4e2a303d816e92d99ebc9730ca47c03"
+  },
+  "acquisition_summary.png": {
+    "source": "overleaf/figures/bo_study/acquisition_summary.png",
+    "sha256": "7f4a95147ca4e2c3df35ec380dd64f5b3b7e4992b7e076870357f038ddc87964"
+  },
+  "paired_weights.png": {
+    "source": "overleaf/figures/bo_study/paired_weights.png",
+    "sha256": "ec7f2817924a99832642537ae678fe947146087615fee88a3a74439f88347302"
+  },
+  "paired_rate_posterior.png": {
+    "source": "overleaf/figures/bo_study/paired_rate_posterior.png",
+    "sha256": "8b0839627efdf71ca01b174bc5b2c20bbda8d7f70ea2388e714fb8e9d693ed74"
+  },
+  "cosmic_integration_physical.png": {
+    "source": "overleaf/figures/bo_study/cosmic_integration_physical.png",
+    "sha256": "d51cf79cc2f78e1c9b6a9750df81215572bcde9ff8bd2168e0d20d3c58ac7858"
+  },
+  "posterior_stop_uncertain.png": {
+    "source": "overleaf/figures/bo_study/posterior_stop_uncertain.png",
+    "sha256": "59b1c11bdd01eda6eebfe958b057fe3cd4bf81c93871b235f58c949907e600d2"
+  },
+  "population_likelihood_loss.png": {
+    "source": "overleaf/figures/bo_study/population_likelihood_loss.png",
+    "sha256": "bd75123023c1990f259429f54d2a5fdd4b3464a5ab08ab8720f28b7844b29bb2"
+  },
+  "posterior_stop_perfect.png": {
+    "source": "overleaf/figures/bo_study/posterior_stop_perfect.png",
+    "sha256": "9d96a76e3c62d3f8c27d747b968010bb1813126b73ef3e6d4b37be6aa5cf2cd6"
+  },
+  "posterior_predictive_1200.png": {
+    "source": "overleaf/figures/bo_study/posterior_predictive_1200.png",
+    "sha256": "7e62ed962abaeb1500c5db4930cb819518dea27a88694871c3c89f1e50c390a0"
+  },
+  "posterior_predictive_30.png": {
+    "source": "overleaf/figures/bo_study/posterior_predictive_30.png",
+    "sha256": "4ffbf4ee6a8baf83c6cd8a1ff430a2a68b3217a67d65b9ae0df61146510705f3"
+  }
+}
