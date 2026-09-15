@@ -2,13 +2,41 @@
 
 ## Sept 16, 2026
 
+### Four-input inference update
 
+#### 1. What has changed
 
-\<updates>
+* We now train the likelihood surrogate directly in all four parameters: metallicity evolution `alpha`, metallicity spread `sigma`, star-formation-rate amplitude `a`, and star-formation-rate evolution `d`.
+* The exact amplitude calculation is still retained as an independent check. This is important because the older analysis fitted only the three shape parameters and reconstructed amplitude afterwards.
+* The present campaign uses the fixed 256M COMPAS population and the existing paper catalogues. It is an inference study, not a new stellar-evolution calculation.
 
+#### 2. What the first four-input results say
 
+* At the 16 September check, 15 of the 632 planned fits had been scored: **9 passed the posterior-accuracy checks and 6 failed**. None was numerically unresolved. These are the first jobs returned, so they are not a representative success rate.
+* At the final 2994-label budget, both BO and random fits passed for the two 10-event cases. For the 50- and 100-event cases scored so far, BO passed and IID-random failed. At 200 expected events, the perfect-measurement BO run timed out at 2934 labels and the random fit failed; the uncertain-measurement BO run passed and the random fit failed.
+* The main conclusion is therefore limited: **2994 labels are not enough to guarantee an accurate four-input posterior.** We need to understand the failures before treating the new method as a replacement for the baseline.
 
+#### 3. What this means for the draft
 
+* The paper's new four-input table is an earlier, 15 September snapshot and needs updating before it is presented as current.
+* The GP-dependent figures in the draft still use the older three-input, amplitude-marginalised analysis. A four-parameter corner plot alone does not show that it came from a direct four-input fit.
+* The population-size, effective-pixel-support, event-weight, and physical-rate figures do not depend on the GP dimension and still apply.
+* We can say that the four-input pipeline is being tested. We cannot yet claim a validated four-input replacement, a general stopping rule, or a required number of random points.
+
+#### 4. Campaign status and runtime
+
+* Four jobs remain running. One 200-event perfect-measurement run timed out at 2934 labels and needs checkpoint recovery; this is not an accuracy failure.
+* The queued part of the Slurm array would not be held, so the 612 pending job IDs were saved and cancelled for later resubmission. They are not currently waiting in the queue.
+* Completed full fits take about **6.1–7.3 hours** on one CPU. The long jobs are actively progressing and use only about 2.2–2.6 GB of their 16 GB allocation, so this is not a memory stall.
+* The late-stage cost is dominated by refitting the exact GP. At 2994 labels, 20 optimiser steps take about **63 seconds**; a 250-step refit is therefore about **13 minutes**. Updating the GP between refits is much cheaper, so improving that update alone will not materially shorten a fit.
+
+#### 5. Proposed next steps
+
+* Keep the campaign inputs, code, and checkpoints fixed. Recover the timed-out fit with the same run identity.
+* Diagnose the failed four-input fits using local likelihood residuals, amplitude slices, and their checkpoint histories.
+* Measure the separate time spent on labels, conditioning, acquisition, refitting, and compilation at production-sized checkpoints.
+* Test warm-started refits on representative catalogues, then compare their posterior accuracy and selected BO points with the saved configuration before changing the production campaign.
+* For BO versus random, score matched saved checkpoints against the same independent references. Report the first checkpoint that passes and is confirmed at the following checkpoint; keep runs that have not passed as `>2994` rather than dropping them.
 
 ## August 19, 2026
 
